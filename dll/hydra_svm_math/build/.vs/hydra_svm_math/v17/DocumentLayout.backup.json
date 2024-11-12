@@ -1,0 +1,72 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\build\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0A8F574C-242A-34C2-B597-302671EC28C8}|hydra_svm_math.vcxproj|D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\source\\hydra_svm_math.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0A8F574C-242A-34C2-B597-302671EC28C8}|hydra_svm_math.vcxproj|D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\include\\types.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0A8F574C-242A-34C2-B597-302671EC28C8}|hydra_svm_math.vcxproj|D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\include\\hydra_svm_math.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "types.h",
+              "DocumentMoniker": "D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\include\\types.h",
+              "RelativeDocumentMoniker": "..\\include\\types.h",
+              "ToolTip": "D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\include\\types.h",
+              "RelativeToolTip": "..\\include\\types.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAmwBMAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-10-15T14:34:22.661Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "hydra_svm_math.h",
+              "DocumentMoniker": "D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\include\\hydra_svm_math.h",
+              "RelativeDocumentMoniker": "..\\include\\hydra_svm_math.h",
+              "ToolTip": "D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\include\\hydra_svm_math.h",
+              "RelativeToolTip": "..\\include\\hydra_svm_math.h",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAACYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-10-14T11:45:33.793Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "hydra_svm_math.cpp",
+              "DocumentMoniker": "D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\source\\hydra_svm_math.cpp",
+              "RelativeDocumentMoniker": "..\\source\\hydra_svm_math.cpp",
+              "ToolTip": "D:\\Work\\Project\\sound_velocity_sensor\\cpp\\dll\\hydra_svm_math\\source\\hydra_svm_math.cpp*",
+              "RelativeToolTip": "..\\source\\hydra_svm_math.cpp*",
+              "ViewState": "AgIAAJ4BAAAAAAAAAAAUwLEBAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-10-06T19:41:05.62Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

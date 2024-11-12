@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\source\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\source\hydra_svm_math.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\source\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\include\defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\include\framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\include\hydra_svm_math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\include\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\include\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{6C94B897-D94E-357E-864E-DBC7F628277F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{AC7EF2A7-1C25-32D5-8C23-2092173314FB}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

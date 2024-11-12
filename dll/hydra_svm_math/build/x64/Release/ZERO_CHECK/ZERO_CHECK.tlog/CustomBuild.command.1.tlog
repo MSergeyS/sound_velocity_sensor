@@ -1,0 +1,10 @@
+^D:\WORK\PROJECT\SOUND_VELOCITY_SENSOR\CPP\DLL\HYDRA_SVM_MATH\BUILD\CMAKEFILES\DA093DE3DC735B1DE26207E848D34E74\GENERATE.STAMP.RULE
+setlocal
+C:\dev\CMake\bin\cmake.exe -SD:/Work/Project/sound_velocity_sensor/cpp/dll/hydra_svm_math -BD:/Work/Project/sound_velocity_sensor/cpp/dll/hydra_svm_math/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/Work/Project/sound_velocity_sensor/cpp/dll/hydra_svm_math/build/hydra_svm_math.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

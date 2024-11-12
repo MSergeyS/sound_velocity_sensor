@@ -1,0 +1,7 @@
+﻿  hydra_svm_math.cpp
+D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\source\hydra_svm_math.cpp(130,19): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\source\hydra_svm_math.cpp(229,39): warning C4244: '=': conversion from 'double' to 'int32_t', possible loss of data
+D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\source\hydra_svm_math.cpp(230,39): warning C4244: '=': conversion from 'double' to 'int32_t', possible loss of data
+D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\source\hydra_svm_math.cpp(767,1): warning C4723: potential divide by 0
+     Creating library D:/Work/Project/sound_velocity_sensor/cpp/dll/hydra_svm_math/build/Release/hydra_svm_math.lib and object D:/Work/Project/sound_velocity_sensor/cpp/dll/hydra_svm_math/build/Release/hydra_svm_math.exp
+  hydra_svm_math.vcxproj -> D:\Work\Project\sound_velocity_sensor\cpp\dll\hydra_svm_math\build\Release\hydra_svm_math.dll

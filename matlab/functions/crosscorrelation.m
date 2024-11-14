@@ -9,7 +9,7 @@ scope_real = double(scope_real);
 otr1 = double(otr1);
 otr2 = double(otr2);
 
-    reserve = 12; % запас
+    reserve = 17; % запас
     signal_size = 30 * (DATA_RATE / FREQUENCY_CENTRAL);
     window_size = (signal_size + 4*reserve); % сигнал с хвостом
     if(otr1 == 0)
@@ -54,31 +54,45 @@ otr2 = double(otr2);
     
     %% Вычисление корреляционной функции
     % сигнал в первом окне
-    inx_window_1 = otr1 - reserve;
+    inx_window_1 = otr1 - reserve-1;
     s1 = scope_complex(inx_window_1:inx_window_1 + window_size-1);
     s1(225:end) = 0 + 1i*0;
     % сигнал во втором окне
-    inx_window_2 = otr2 - reserve;
+    inx_window_2 = otr2 - reserve-1;
     s2 = scope_complex(inx_window_2:inx_window_2 + window_size-1);
 
     % взаимная корреляция
     xss = xcorr(s2,s1);
     % берём только правую часть
     xss = xss(size(s2,2):end);
+    xss = floor(real(xss)) + 1i*floor(imag(xss));
     
     % нормируем
-    xss = xss / (signal_size*2^(2*ADC_WIDTH-1));
+    %xss = xss / (signal_size*2^(2*ADC_WIDTH-1));
     % ищем максимум
     [~, inx_max_xss] = max(abs(xss));
     % phase = angle(xss(inx_max_xss_x)); % фаза ВКФ
+    phase = single(atan2(single(imag(xss(inx_max_xss))),single(real(xss(inx_max_xss)))));
     
+    inx_max_xss_f = NaN;
     if (reserve ~= 0)    
         % уточняем индек начала фронта
-        inx_max_xss = precisely_index_max_v1 ( ...
+        % inx_max_xss_f = precisely_index_max_v0 ( ...
+        %     scope_complex(otr1-reserve:otr1+reserve), ...
+        %     scope_complex(otr2-reserve:otr2+3*reserve));
+        inx_max_xss_f = precisely_index_max_v1 ( ...
             scope_complex(otr1-reserve:otr1+reserve), ...
-            scope_complex(otr2-reserve:otr2+3*reserve));
+            scope_complex(otr2-reserve:otr2+3*reserve), ...
+            0.2, 0.6);
+        if (inx_max_xss < 1)
+            inx_max_xss = 1;
+        end
     end
-    phase = angle(xss(inx_max_xss)); % фаза ВКФ
+    if (~isinf(inx_max_xss_f) && ~isnan(inx_max_xss_f) && inx_max_xss_f>1)
+       inx_max_xss = inx_max_xss_f;
+    end
+    % phase = angle(single(xss(inx_max_xss)))); % фаза ВКФ
+    % phase = single(atan2(single(imag(xss(inx_max_xss))),single(real(xss(inx_max_xss)))));
 
     % diff_xss = diff([abs(xss) 0]);
     % I = find(diff_xss(inx_max_xss + (-5:5)) > 0, 1, 'last');
@@ -93,13 +107,13 @@ otr2 = double(otr2);
     if ( (phase < 0) && ( inx_max - fix_num_periods*4 > 1) ) || ...
        ( (phase < -pi/2) && ( inx_max - fix_num_periods*4 == 1) ) || ...
        ( (phase >= 0) && (phase < pi/2) && (inx_max - fix_num_periods * 4 == 3) )
-        fix_num_periods = fix_num_periods + 1;
+        fix_num_periods = single(fix_num_periods + 1);
     end
 
-    time_propagation = (fix_num_periods + phase/(2*pi))/FREQUENCY_CENTRAL;
+    time_propagation = (fix_num_periods + phase/single(2*pi))/FREQUENCY_CENTRAL;
     
-    time = 1e6*(otr2 - otr1 + (0:window_size-1))./DATA_RATE;
-
+    % time = 1e6*(otr2 - otr1 + (0:window_size-1))./DATA_RATE;
+    % 
     % figure(777)
     %   axc(1) = subplot(3,1,1);
     %     plot(time,abs(s1),'.r')
@@ -141,14 +155,14 @@ otr2 = double(otr2);
     %   drawnow
     %   % pause(0.5)
 
-    % sound_velocity = 2 * (base(2) - base(1)) ./ time_propagation; 
-    % otr1_x = uint16(round((2*base(1)/sound_velocity)*DATA_RATE));
-    % otr2_x = uint16(round((2*base(2)/sound_velocity)*DATA_RATE));
-    % 
+    sound_velocity = 2 * (base(2) - base(1)) ./ time_propagation; 
+    otr1 = uint16(round((2*base(1)/sound_velocity)*DATA_RATE));
+    otr2 = uint16(round((2*base(2)/sound_velocity)*DATA_RATE));
+
       % figure(17)
-      %  plot (abs(scope_complex(otr1_x-2*reserve:otr1_x-2*reserve+window_size)),'.r-')
+      %  plot (abs(scope_complex(otr1-2*reserve-1:otr1-2*reserve+window_size-1)),'.r-')
       %  hold on
-      %  plot (abs(scope_complex(otr2_x-2*reserve:otr2_x-2*reserve+window_size)),'.b-')
+      %  plot (abs(scope_complex(otr2-2*reserve:otr2-2*reserve+window_size)),'.b-')
       %  hold off
       %  grid on
       %  drawnow

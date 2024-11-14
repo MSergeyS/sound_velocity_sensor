@@ -23,7 +23,7 @@ function test_otr (scope_real, otr1, otr2, test_plots)
     test_plots.h_imag.YData = imag(scope_complex);
     test_plots.h_abs.YData = abs(scope_complex);
     test_plots.h_angle.YData = angle(scope_complex);
-    test_plots.h_s1.YData = abs(scope_complex(otr1-2*reserve:otr1-2*reserve+window_size));
+    test_plots.h_s1.YData = abs(scope_complex(otr1-1-2*reserve:otr1-1-2*reserve+window_size));
     test_plots.h_s2.YData = abs(scope_complex(otr2-2*reserve:otr2-2*reserve+window_size));
     drawnow
  end

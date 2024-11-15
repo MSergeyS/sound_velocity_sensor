@@ -20,7 +20,7 @@ otr2 = double(otr2);
 
     end
 
-    otr2 = otr2 - reserve;
+    otr2 = otr2 - reserve; %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    
     % получаем комплексные отсчёты
     scope_complex = [ (      scope_real(1:4:end) + 1i*scope_real(2:4:end) ); ...
@@ -75,20 +75,21 @@ otr2 = double(otr2);
     phase = single(atan2(single(imag(xss(inx_max_xss))),single(real(xss(inx_max_xss)))));
     
     inx_max_xss_f = NaN;
+    otr2 = otr2 + reserve;
     if (reserve ~= 0)    
         % уточняем индек начала фронта
         % inx_max_xss_f = precisely_index_max_v0 ( ...
         %     scope_complex(otr1-reserve:otr1+reserve), ...
         %     scope_complex(otr2-reserve:otr2+3*reserve));
         inx_max_xss_f = precisely_index_max_v1 ( ...
-            scope_complex(otr1-reserve:otr1+reserve), ...
-            scope_complex(otr2-reserve:otr2+3*reserve), ...
+            scope_complex(otr1 - 7:otr1+2*reserve - 5), ...
+            scope_complex(otr2 - 7:otr2+2*reserve - 5), ...
             0.2, 0.6);
         if (inx_max_xss < 1)
             inx_max_xss = 1;
         end
     end
-    if (~isinf(inx_max_xss_f) && ~isnan(inx_max_xss_f) && inx_max_xss_f>1)
+    if (~isinf(inx_max_xss_f) && ~isnan(inx_max_xss_f)) % && inx_max_xss_f>1)
        inx_max_xss = inx_max_xss_f;
     end
     % phase = angle(single(xss(inx_max_xss)))); % фаза ВКФ

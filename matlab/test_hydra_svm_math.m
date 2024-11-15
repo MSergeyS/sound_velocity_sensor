@@ -7,7 +7,7 @@ global ADC_WIDTH
 global FREQUENCY_CENTRAL
 global DATA_RATE
 
-fl_plot_animation = true;
+fl_plot_animation = false;
 
 HYDRA_SVM_ADC_OUT_BUFF_SIZE = 1320;
 ADC_WIDTH = 12;
@@ -56,7 +56,11 @@ base = single([24; 58] / 1000);
 % test_data = readmatrix('../../data/08.11.2024/47_2/adc_023047_12_46COM3.txt');
 % test_data = readmatrix('../../data/08.11.2024/47_2/adc_023047_12_59COM3.txt');
 % test_data = readmatrix('../../data/08.11.2024/47_3/adc_023047_13_30COM3.txt');
-test_data = readmatrix('../../data/14.11.2024/adc_023047_15_30COM3.txt');
+% test_data = readmatrix('../../data/14.11.2024/adc_023047_15_30COM3.txt');
+test_data = readmatrix('../../data/15.11.2024/adc_023047_10_2COM3.txt');
+
+sound_velocity = readmatrix('../../data/15.11.2024/adc_023047_10_2COM3stab.txt');
+sound_velocity = sound_velocity(:,4)';
 
 num_blank = 330;
 start_col = 2;
@@ -114,9 +118,9 @@ end
 test_data = int16(test_data);
 test_data(:,1:num_blank) = NaN;
 
-sound_velocity = sound_velocity_ini: ...
-                 (sound_velocity_tgt-sound_velocity_ini)/(number_line-1): ...
-                 sound_velocity_tgt;
+% sound_velocity = sound_velocity_ini: ...
+%                  (sound_velocity_tgt-sound_velocity_ini)/(number_line-1): ...
+%                  sound_velocity_tgt;
 sound_velocity_estimation_vkf4 = NaN(1,number_line);
 sound_velocity_estimation_my   = NaN(1,number_line);
 sound_velocity_estimation      = NaN(1,number_line);
@@ -142,7 +146,7 @@ linkaxes(h_ax, 'x')
 
 figure;
   h_axx(1) = subplot(3,1,[1 2]);
-    %h_sv_etalon    = plot(1:number_line,sound_velocity, '.k');
+    h_sv_etalon    = plot(1:number_line,sound_velocity, '.k');
     hold on
     h_sv_my        = plot(1:number_line,NaN(1,number_line), 'og');
     h_sv_matlab    = plot(1:number_line,NaN(1,number_line), '.b');
@@ -245,14 +249,17 @@ toc
     [time_propagation, otr1_matlab, otr2_matlab] = ...
                         crosscorrelation (test_workmass_ptr.Value, base, ...
                                            otr1_ptr.Value, otr2_ptr.Value);
-    test_otr (test_workmass_ptr.Value, otr1_ptr.Value, otr2_ptr.Value, test_plots);
+    % otr1_ptr.Value = otr1_dll;
+    % otr2_ptr.Value = otr2_dll;
+    otr1_ptr.Value = otr1_matlab;
+    otr2_ptr.Value = otr2_matlab;
+    % test_otr (test_workmass_ptr.Value, otr1_ptr.Value, otr2_ptr.Value, test_plots);
     sound_velocity_estimation(inx_line) = 2 * (base(2) - base(1)) ./ time_propagation;
 
     % % fprintf('время распространения = %f [мкс]\n', time_propagation_fi * 1e6);
     % fprintf('скорость распространения звука = %8.2f [м/с]\n', sound_velocity_estimation_fi);
 
-    otr1_ptr.Value = otr1_dll;
-    otr2_ptr.Value = otr2_dll;
+    
 
     if (fl_plot_animation)
         h_input_data.YData = test_mass;
@@ -300,6 +307,8 @@ h_err_sv_matlab.YData    = (sound_velocity - sound_velocity_estimation)*100;
 h_err_sv_matlab_fi.YData = (sound_velocity - sound_velocity_estimation_fi)*100;
 
 drawnow
+
+sum(abs(sound_velocity - sound_velocity_estimation)>3)
 
 clear all
 unloadlibrary hydra_svm_math;

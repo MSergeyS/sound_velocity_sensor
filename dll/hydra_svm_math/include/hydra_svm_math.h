@@ -47,7 +47,7 @@ uint16_t hydra_xcorr_real_v0(Hydra_Svm_Complex32_t* s1, Hydra_Svm_Complex32_t* s
                           uint16_t window_size);
 
 extern "C" HYDRA_SVM_MATH_API
-uint16_t hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t* s2,
+int16_t hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t* s2,
                           const float trh_1, const float trh_2, const uint16_t window_size);
 
 extern "C" HYDRA_SVM_MATH_API
@@ -55,7 +55,7 @@ uint16_t hydra_xcorr_real_abs(int32_t* s1_abs, int32_t* s2_abs,
                           uint16_t window_size);
 
 extern "C" HYDRA_SVM_MATH_API
-bool hydra_norm_and_trh(int64_t s_abs, int64_t trh, int64_t* min_delta_trh);
+bool hydra_norm_and_trh(int16_t s_abs, int16_t trh, int16_t* min_delta_trh);
 
 
 #endif // HYDRA_SVM_MATH_H_

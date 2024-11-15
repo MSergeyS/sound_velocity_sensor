@@ -35,9 +35,9 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
 
     Hydra_Svm_Complex32_t xcorr_max = {0,0};
     int64_t               xcorr_max_abs = 0;
-    uint16_t              index_xcorr_max = 0;
+    int16_t               index_xcorr_max = 0;
 
-    uint16_t reserve = 12; // 0
+    uint16_t reserve = 17; // 0
     float    phase = 0.0;
     float    abs = 0;
     int64_t xcorr_current_abs = 0;
@@ -100,7 +100,7 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
         // data_complex[i + 3].Im = p_workconverted[i + 4];
     }
 
-    uint16_t index_xcorr_max_f = 0;
+    int16_t index_xcorr_max_f = 0;
     Hydra_Svm_Complex32_t* s1;
     Hydra_Svm_Complex32_t* s2;
 
@@ -156,14 +156,25 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
 
     if (otr_true)
     {
-        s1 = &data_complex[otr1 - reserve - 2];
-        s2 = &data_complex[otr2 - reserve - 2];
-
+        //s1 = &data_complex[otr1 - reserve];
+        //s2 = &data_complex[otr2 - reserve];
+        
         //index_xcorr_max_f = hydra_xcorr_real_v0(s1, s2, 2 * reserve);
-        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 2 * reserve+1);
+
+        otr2 = otr2 + reserve;
+        index_xcorr_max = index_xcorr_max - (int16_t)reserve;
+
+        s1 = &data_complex[otr1 - 8];
+        s2 = &data_complex[otr2 - 8];
+
+        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 2*reserve + 1);
+
+        std::cout << index_xcorr_max_f << " " << index_xcorr_max << std::endl;
+  
         index_xcorr_max =
-            ((index_xcorr_max - index_xcorr_max_f > -7) && (index_xcorr_max - index_xcorr_max_f < 7)) ?
-            index_xcorr_max_f : index_xcorr_max;
+               ((((int16_t)index_xcorr_max - (int16_t)index_xcorr_max_f) > -7) &&
+                (((int16_t)index_xcorr_max - (int16_t)index_xcorr_max_f) < 7)) ?
+               index_xcorr_max_f : index_xcorr_max;
     }
 
     //после того, как нашли максимальное a b, берем atan(b/a) в максимальном месте
@@ -345,7 +356,7 @@ hydra_xcorr_real_abs(int32_t* s1_abs, int32_t* s2_abs, uint16_t window_size)
             inx_s2 = i + j;
             xcorr_current_abs = xcorr_current_abs +
                 ((s1_abs[j] > s2_abs[inx_s2]) ?
-                    s1_abs[j] - s2_abs[inx_s2] : s2_abs[inx_s2] - s1_abs[j]);
+                  s1_abs[j] - s2_abs[inx_s2] : s2_abs[inx_s2] - s1_abs[j]);
         }
         if (xcorr_current_abs < xcorr_min_abs)
         {
@@ -358,7 +369,7 @@ hydra_xcorr_real_abs(int32_t* s1_abs, int32_t* s2_abs, uint16_t window_size)
     return index_xcorr_min;
 }
 
-uint16_t
+int16_t
 hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t* s2, 
                     const float trh_1, const float trh_2, const uint16_t window_size)
 {
@@ -366,51 +377,61 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     {
         return 0;
     }
+    //if (window_size > 100)
+    //{
+    //    return 0;
+    //}
 
-    int64_t  s1_abs[100] = { 0 };
-    int64_t  s2_abs[100] = { 0 };
-    int64_t  s1_abs_t[100] = { 0 };
-    int64_t  s2_abs_t[100] = { 0 };
+    int16_t  s1_abs[100] = { 0 };
+    int16_t  s2_abs[100] = { 0 };
+    int16_t  s1_abs_t[100] = { 0 };
+    int16_t  s2_abs_t[100] = { 0 };
 
     // ищем абсолютное значение
-    int64_t  s1_abs_max = 0;
-    int64_t  s2_abs_max = 0;
+    int16_t  s1_abs_max = 0;
+    int16_t  s2_abs_max = 0;
     for (uint16_t i = 0; i < window_size; i++)
     {
-        s1_abs_t[i] = (int64_t)sqrt(s1[i].Re * s1[i].Re + s1[i].Im * s1[i].Im);
-        s2_abs_t[i] = (int64_t)sqrt(s2[i].Re * s2[i].Re + s2[i].Im * s2[i].Im);
-        s2_abs_t[window_size + i] =
-            (int64_t)sqrt(s2[window_size + i].Re * s2[window_size + i].Re +
-                          s2[window_size + i].Im * s2[window_size + i].Im);
+        s1_abs_t[i] = (int16_t)sqrt(s1[i].Re * s1[i].Re + s1[i].Im * s1[i].Im);
+        s2_abs_t[i] = (int16_t)sqrt(s2[i].Re * s2[i].Re + s2[i].Im * s2[i].Im);
         s1_abs_max = (s1_abs_max > s1_abs_t[i]) ? s1_abs_max : s1_abs_t[i];
         s2_abs_max = (s2_abs_max > s2_abs_t[i]) ? s2_abs_max : s2_abs_t[i];
-        s2_abs_max = (s2_abs_max > s2_abs_t[window_size + i]) ? s2_abs_max : s2_abs_t[window_size + i];
-    }
-    uint16_t inx_1 = 0;
-    uint16_t inx_2 = 0;
-    for (uint16_t i = 0; i < window_size; i++)
-    {
-        inx_1 = (i > 0) ? (i - 1) : i;
-        inx_2 = (i < (window_size - 1)) ? (i + 1) : i;
-        s1_abs[i] = (s1_abs_t[inx_1] + s1_abs_t[i] + s1_abs_t[inx_2]) / 3;
-        s2_abs[i] = (s2_abs_t[inx_1] + s2_abs_t[i] + s2_abs_t[i + 1]) / 3;
-        s2_abs[window_size + i] = (s2_abs_t[window_size + i - 1] + 
-                                   s2_abs_t[window_size + i] + 
-                                   s2_abs_t[window_size + inx_2]) / 3;
     }
 
+    for (uint16_t i = 1; i < window_size-1; i++)
+    {
+        s1_abs[i] = (s1_abs_t[i - 1] + s1_abs_t[i] + s1_abs_t[i + 1]) / 3;
+        s2_abs[i] = (s2_abs_t[i - 1] + s2_abs_t[i] + s2_abs_t[i + 1]) / 3;
+    }
+    s1_abs[0] = s1_abs_t[0];
+    s1_abs[window_size-1] = s1_abs_t[window_size-1];
+    s2_abs[0] = s2_abs_t[0];
+    s2_abs[window_size-1] = s2_abs_t[window_size-1];
+
+    std::cout << "s1_abs = [";
+    for (int16_t i = 0; i < window_size; i++)
+    {
+        std::cout << s1_abs[i] << " ";
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "s2_abs = [";
+    for (int16_t i = 0; i < window_size; i++)
+    {
+        std::cout << s2_abs[i] << " ";
+    }
+    std::cout << "]" << std::endl;
+
     // значение порогов
-    int64_t trh_1_s1 = (int64_t)(trh_1 * (float)s1_abs_max);
-    int64_t trh_2_s1 = (int64_t)(trh_2 * (float)s1_abs_max);
-    int64_t trh_1_s2 = (int64_t)(trh_1 * (float)s2_abs_max);
-    int64_t trh_2_s2 = (int64_t)(trh_2 * (float)s2_abs_max);
+    int16_t trh_1_s1 = (int16_t)(trh_1 * (float)s1_abs_max);
+    int16_t trh_2_s1 = (int16_t)(trh_2 * (float)s1_abs_max);
+    int16_t trh_1_s2 = (int16_t)(trh_1 * (float)s2_abs_max);
+    int16_t trh_2_s2 = (int16_t)(trh_2 * (float)s2_abs_max);
 
     // ищем индекс и значение для порога trh_2
     int16_t inx_s1_trh2 = 0;
     int16_t inx_s2_trh2 = 0;
-    int64_t min_delta_trh2_s1 = LLONG_MAX;
-    int64_t min_delta_trh2_s2 = LLONG_MAX;
-    std::cout << "s1_abs = [";
+    int16_t min_delta_trh2_s1 = INT16_MAX;
+    int16_t min_delta_trh2_s2 = INT16_MAX;
     for (int16_t i = 0; i < window_size; i++)
     {
         // для массива s1
@@ -423,13 +444,8 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
         {
             inx_s2_trh2 = i;
         }
-        if (hydra_norm_and_trh(s2_abs[window_size + i], trh_2_s2, &min_delta_trh2_s2))
-        {
-            inx_s2_trh2 = (int16_t)window_size + i;
-        }
-        std::cout << s1_abs[i] << " ";
     }
-    std::cout << "]" << std::endl;
+
     int64_t abs_s1_trh2 = s1_abs[inx_s1_trh2];
     int64_t abs_s2_trh2 = s2_abs[inx_s2_trh2];
 
@@ -461,25 +477,25 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     }
 
     float inx_s1_0 = (float)inx_s1_trh1 +
-            (float)( (int64_t)inx_s1_trh1 * abs_s1_trh1) / (float)(abs_s1_trh2 - abs_s1_trh1);
+            (float)( (int16_t)inx_s1_trh1 * abs_s1_trh1) / (float)(abs_s1_trh2 - abs_s1_trh1);
     float inx_s2_0 = (float)inx_s2_trh1 +
-            (float)((int64_t)inx_s2_trh1 * abs_s2_trh1) / (float)(abs_s2_trh2 - abs_s2_trh1);
+            (float)((int16_t)inx_s2_trh1 * abs_s2_trh1) / (float)(abs_s2_trh2 - abs_s2_trh1);
 
     std::cout << inx_s1_trh1 << " " << inx_s1_trh2 << " " <<
                  abs_s1_trh1 << " " << abs_s1_trh2 << " " << inx_s1_0 << std::endl;
     std::cout << inx_s2_trh1 << " " << inx_s2_trh2 << " " << 
                  abs_s2_trh1 << " " << abs_s2_trh2 << " " << inx_s2_0 << std::endl;
 
-    uint16_t index = uint16_t(round(inx_s2_0 - inx_s1_0)) + (inx_s2_trh2 - inx_s1_trh2) - 0;
+    int16_t index = int16_t(round(inx_s2_0 - inx_s1_0)) + (inx_s2_trh2 - inx_s1_trh2);
     std::cout << index << std::endl;
     return index;
 }
 
 bool
-hydra_norm_and_trh(int64_t s_abs, int64_t trh, int64_t* min_delta_trh)
+hydra_norm_and_trh(int16_t s_abs, int16_t trh, int16_t* min_delta_trh)
 {
     // ищем ближайшее к trh значение
-    int64_t delta = (trh > s_abs) ? (trh - s_abs) : (s_abs - trh);
+    int16_t delta = (trh > s_abs) ? (trh - s_abs) : (s_abs - trh);
     if (delta < *min_delta_trh) {
         *min_delta_trh = delta; // запоминаем новую min delta
         return true; // признак изменения значений

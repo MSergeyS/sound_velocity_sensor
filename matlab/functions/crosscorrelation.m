@@ -13,9 +13,9 @@ otr2 = double(otr2);
     signal_size = 30 * (DATA_RATE / FREQUENCY_CENTRAL);
     window_size = (signal_size + 4*reserve); % сигнал с хвостом
     if(otr1 == 0)
-        otr1 = 336;             % минимальный индекс начала первого окна
-        otr2 = 811;             % минимальный индекс начала первого окна
-        window_size = 370;      % максимальный размер окна
+        otr1 = 300;             % минимальный индекс начала первого окна
+        otr2 = 730;             % минимальный индекс начала первого окна
+        window_size = 433;      % максимальный размер окна
         reserve = 0; % запас
 
     end
@@ -30,26 +30,36 @@ otr2 = double(otr2);
 
     scope_complex = reshape(scope_complex,1, size(scope_real,2));
 
-    % figure(555)
-    % subplot(2,1,1)
-    %    plot(real(scope_complex),'.r')
-    %    hold on
-    %    plot(imag(scope_complex),'.b')
-    %    plot(abs(scope_complex),'.g')
-    %    fill(otr1 - reserve + window_size*[0 0 1 1],2^(ADC_WIDTH-1)*[1 -1 -1 1],'red','FaceAlpha',0.2)
-    %    fill(otr2 - reserve + window_size*[0 0 1 1],2^(ADC_WIDTH-1)*[1 -1 -1 1],'red','FaceAlpha',0.2)
-    %    hold off
-    %    grid on
-    %    % xlim([370 420])
-    %    ylim(2^(ADC_WIDTH-1)*[-1 1])
-    % subplot(2,1,2)
-    %    plot(angle(scope_complex),'.g')
-    %    hold on
-    %    fill(otr1 - reserve + window_size*[0 0 1 1],pi*[1 -1 -1 1],'red','FaceAlpha',0.2)
-    %    fill(otr2 - reserve + window_size*[0 0 1 1],pi*[1 -1 -1 1],'red','FaceAlpha',0.2)
-    %    hold off
-    %    grid on
-    %    ylim(pi*[-1 1])
+    figure(555)
+    subplot(2,1,1)
+       plot(real(scope_complex),'.r')
+       hold on
+       plot(imag(scope_complex),'.b')
+       plot(abs(scope_complex),'.g')
+       fill(otr1 - reserve + window_size*[0 0 1 1],2^(ADC_WIDTH-1)*[1 -1 -1 1],'red','FaceAlpha',0.2)
+       fill(otr2 - reserve + window_size*[0 0 1 1],2^(ADC_WIDTH-1)*[1 -1 -1 1],'red','FaceAlpha',0.2)
+       hold off
+       grid on
+       % xlim([370 420])
+       ylim(2^(ADC_WIDTH-1)*[-1 1])
+    subplot(2,1,2)
+       plot(angle(scope_complex),'.g')
+       hold on
+       fill(otr1 - reserve + window_size*[0 0 1 1],pi*[1 -1 -1 1],'red','FaceAlpha',0.2)
+       fill(otr2 - reserve + window_size*[0 0 1 1],pi*[1 -1 -1 1],'red','FaceAlpha',0.2)
+       hold off
+       grid on
+       ylim(pi*[-1 1])
+
+   % persistent aa;
+   %  if isempty(aa)
+   %      figure(666)
+   %      aa = plot(mean(abs(scope_complex(310:end))),'.g');
+   %      grid on
+   %  else
+   %      aa.YData = [aa.YData mean(abs(scope_complex(310:end)))];
+   %  end
+
 
     
     %% Вычисление корреляционной функции
@@ -81,9 +91,13 @@ otr2 = double(otr2);
         % inx_max_xss_f = precisely_index_max_v0 ( ...
         %     scope_complex(otr1-reserve:otr1+reserve), ...
         %     scope_complex(otr2-reserve:otr2+3*reserve));
+        % inx_max_xss_f = precisely_index_max_v1 ( ...
+        %     scope_complex(otr1 - 7:otr1+2*reserve - 5), ...
+        %     scope_complex(otr2 - 7:otr2+2*reserve - 5), ...
+        %     0.2, 0.6);
         inx_max_xss_f = precisely_index_max_v1 ( ...
-            scope_complex(otr1 - 7:otr1+2*reserve - 5), ...
-            scope_complex(otr2 - 7:otr2+2*reserve - 5), ...
+            scope_complex(otr1+reserve:otr1+3*reserve), ...
+            scope_complex(otr2+reserve:otr2+3*reserve), ...
             0.2, 0.6);
         if (inx_max_xss < 1)
             inx_max_xss = 1;
@@ -92,7 +106,8 @@ otr2 = double(otr2);
     if (~isinf(inx_max_xss_f) && ~isnan(inx_max_xss_f)) % && inx_max_xss_f>1)
        inx_max_xss = inx_max_xss_f;
     end
-    % phase = angle(single(xss(inx_max_xss)))); % фаза ВКФ
+
+    % phase = angle(single(xss(inx_max_xss))); % фаза ВКФ
     % phase = single(atan2(single(imag(xss(inx_max_xss))),single(real(xss(inx_max_xss)))));
 
     % diff_xss = diff([abs(xss) 0]);
@@ -113,48 +128,48 @@ otr2 = double(otr2);
 
     time_propagation = (fix_num_periods + phase/single(2*pi))/FREQUENCY_CENTRAL;
     
-    % time = 1e6*(otr2 - otr1 + (0:window_size-1))./DATA_RATE;
-    % 
-    % figure(777)
-    %   axc(1) = subplot(3,1,1);
-    %     plot(time,abs(s1),'.r')
-    %     hold on
-    %     plot(time,abs(s2),'.b')
-    %     % plot(time,angle(s1),'.g')
-    %     hold off
-    %     % ylim([0 2^(ADC_WIDTH-1)])
-    %     % ylim([-pi pi])
-    %     grid on
-    %   axc(2) = subplot(3,1,2);
-    %     plot(time,abs(xss),'.g')
-    %     hold on
-    %     plot(time,diff_xss,'.k')
-    %     line((fix_num_periods/FREQUENCY_CENTRAL)*1e6*[1 1],[0 1], ...
-    %          'Color','r','LineStyle','--')
-    %     line(time_xcorr*1e6*[1 1],[0 1], ...
-    %          'Color','b','LineStyle','--')
-    %     line(time_propagation*1e6*[1 1],[0 1], ...
-    %          'Color','k','LineStyle','--')
-    %     hold off
-    %     grid on
-    %     % xlim((t1 + [-10 10]./DATA_RATE)*1e6)
-    %     % xlim([44 47])
-    %     % ylim(max_abs_xss *[0.9 1.05])  
-    %     % xlim([min(time) max(time)])
-    %     ylim([0.02 0.035])
-    %   axc(3) = subplot(3,1,3);
-    %     plot(time,angle(xss),'.g')
-    %     hold on 
-    %     hold off
-    %     grid on
-    %     % xlim((t1 + [-10 10]./DATA_RATE)*1e6)
-    %     % xlim([44 47])
-    %     % ylim(max_abs_xss + [-0.02 0.005])  
-    %   %   xlim([min(time) max(time)])
-    %     ylim(pi*[-1 1])
-    %   % linkaxes(axc,'x')
-    %   drawnow
-    %   % pause(0.5)
+    time = 1e6*(otr2 - otr1 + (0:window_size-1))./DATA_RATE;
+
+    figure(777)
+      axc(1) = subplot(3,1,1);
+        plot(time,abs(s1),'.r')
+        hold on
+        plot(time,abs(s2),'.b')
+        % plot(time,angle(s1),'.g')
+        hold off
+        % ylim([0 2^(ADC_WIDTH-1)])
+        % ylim([-pi pi])
+        grid on
+      axc(2) = subplot(3,1,2);
+        plot(time,abs(xss),'.g')
+        hold on
+        % plot(time,diff_xss,'.k')
+        line((fix_num_periods/FREQUENCY_CENTRAL)*1e6*[1 1],[0 1], ...
+             'Color','r','LineStyle','--')
+        line(time_xcorr*1e6*[1 1],max(abs(xss))*[0 1], ...
+             'Color','b','LineStyle','--')
+        line(time_propagation*1e6*[1 1],max(abs(xss))*[0 1], ...
+             'Color','k','LineStyle','--')
+        hold off
+        grid on
+        % xlim((t1 + [-10 10]./DATA_RATE)*1e6)
+        % xlim([44 47])
+        % ylim(max_abs_xss *[0.9 1.05])  
+        % xlim([min(time) max(time)])
+        % ylim([0.02 0.035])
+      axc(3) = subplot(3,1,3);
+        plot(time,angle(xss),'.g')
+        hold on 
+        hold off
+        grid on
+        % xlim((t1 + [-10 10]./DATA_RATE)*1e6)
+        % xlim([44 47])
+        % ylim(max_abs_xss + [-0.02 0.005])  
+      %   xlim([min(time) max(time)])
+        ylim(pi*[-1 1])
+      % linkaxes(axc,'x')
+      drawnow
+      % pause(0.5)
 
     sound_velocity = 2 * (base(2) - base(1)) ./ time_propagation; 
     otr1 = uint16(round((2*base(1)/sound_velocity)*DATA_RATE));

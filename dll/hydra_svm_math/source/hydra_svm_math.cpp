@@ -21,13 +21,15 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
     uint16_t window_size = (signal_lenght  + 57); // сигнал с хвостом
     uint16_t max_inx_window_1 = otr1 + window_size;
     bool otr_true = true;
+    uint16_t reserve = 17; // 0
     if(otr1 == 0)
     {
-        otr1 = 336;              // минимальный индекс начала первого окна
-        otr2 = 811;              // минимальный индекс начала первого окна
-        window_size = 370 + 120; // максимальный размер окна
+        otr1 = 300;              // минимальный индекс начала первого окна
+        otr2 = 730;              // минимальный индекс начала первого окна
+        window_size = 433;       // максимальный размер окна
         max_inx_window_1 = 560;  // максимальный индекс первого окна
         otr_true = false;
+        reserve = 0;
     }
 
     uint16_t              data_size = HYDRA_SVM_ADC_OUT_BUFF_SIZE;
@@ -37,7 +39,6 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
     int64_t               xcorr_max_abs = 0;
     int16_t               index_xcorr_max = 0;
 
-    uint16_t reserve = 17; // 0
     float    phase = 0.0;
     float    abs = 0;
     int64_t xcorr_current_abs = 0;
@@ -164,10 +165,10 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
         otr2 = otr2 + reserve;
         index_xcorr_max = index_xcorr_max - (int16_t)reserve;
 
-        s1 = &data_complex[otr1 - 8];
-        s2 = &data_complex[otr2 - 8];
+        s1 = &data_complex[otr1 + reserve];
+        s2 = &data_complex[otr2 + reserve];
 
-        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 2*reserve + 1);
+        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 3*reserve + 1);
 
         std::cout << index_xcorr_max_f << " " << index_xcorr_max << std::endl;
   

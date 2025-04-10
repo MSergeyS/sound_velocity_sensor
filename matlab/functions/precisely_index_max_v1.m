@@ -1,5 +1,5 @@
 function [index] = precisely_index_max_v1 (s1, s2, trh_1, trh_2)
-   fl_plot = false;
+   fl_plot = true;
 
    size_w = length(s1);
 

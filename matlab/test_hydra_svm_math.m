@@ -7,7 +7,7 @@ global ADC_WIDTH
 global FREQUENCY_CENTRAL
 global DATA_RATE
 
-fl_plot_animation = false;
+fl_plot_animation = true;
 
 HYDRA_SVM_ADC_OUT_BUFF_SIZE = 1320;
 ADC_WIDTH = 12;
@@ -57,22 +57,82 @@ base = single([24; 58] / 1000);
 % test_data = readmatrix('../../data/08.11.2024/47_2/adc_023047_12_59COM3.txt');
 % test_data = readmatrix('../../data/08.11.2024/47_3/adc_023047_13_30COM3.txt');
 % test_data = readmatrix('../../data/14.11.2024/adc_023047_15_30COM3.txt');
-test_data = readmatrix('../../data/15.11.2024/adc_023047_10_2COM3.txt');
+% test_data = readmatrix('../../data/15.11.2024/adc_023047_10_2COM3.txt');
+% test_data = readmatrix('../../data/18.11.2024/adc_023047_14_52COM2.txt');
+% sound_velocity = readmatrix('../../data/18.11.2024/adc_023047_10_2COM3stab.txt');
+% test_data = readmatrix('../../data/18.11.2024/adc_023047_14_52COM2.txt');
+% sound_velocity = readmatrix('../../data/18.11.2024/adc_023047_14_52COM2stab.txt');
 
-sound_velocity = readmatrix('../../data/15.11.2024/adc_023047_10_2COM3stab.txt');
-sound_velocity = sound_velocity(:,4)';
+% test_data = readmatrix('../../data/11.02.2025/adc_010000_11_32COM19.txt');
+% sound_velocity = readmatrix('../../data/11.02.2025/adc_010000_11_32COM19stab.txt');
 
-num_blank = 330;
+% test_data = readmatrix('../../data/17.02.2025/adc_010000_11_16COM7.txt');
+% sound_velocity = readmatrix('../../data/17.02.2025/adc_010000_11_16COM7stab.txt');
+
+% test_data = readmatrix('../../data/04.03.2025/adc_04_11_34COM247prc.txt');
+% sound_velocity = readmatrix('../../data/04.03.2025/adc_04_11_34COM247prcstab.txt');
+
+% test_data = readmatrix('../../data/06.03.2025/adc_02_04032025.txt');
+% sound_velocity = readmatrix('../../data/06.03.2025/adc_02_04032025stab.txt');
+
+% test_data = readmatrix('../../data/11.03.2025/adc_02_14_56COM7_no_normalization.txt');
+% sound_velocity = readmatrix('../../data/11.03.2025/adc_02_14_56COM7_no_normalizationstab.txt');
+
+% test_data = readmatrix('../../data/11.03.2025/adc_3MHz_COM7.txt');
+% sound_velocity = readmatrix('../../data/11.03.2025/adc_3MHz_COM7stab.txt');
+
+% test_data = readmatrix('../../data/17.03.2025/adc_00_11_42COM7.txt');
+% sound_velocity = readmatrix('../../data/17.03.2025/adc_00_11_42COM7stab.txt');
+
+
+tmp_data = readcell('../../data/09.04.2025/adc_00_17_27COM14.txt');
+
+number_line = length(tmp_data);
+length_line = 2000;
+test_data = NaN(number_line, length_line);
+num_blank = 300;
 start_col = 2;
-% sound_velocity_ini = 1475;
-% sound_velocity_tgt = 1477;
-sound_velocity_ini = 1421;
-sound_velocity_tgt = 1505;
+
+h = waitbar(0, 'Cчитываем гидролокационные данные...');
+for a_line = 1 : number_line
+    array_str = split(string(tmp_data{a_line}),' ');
+    if ( (length(array_str) - 1) <= length_line)
+      continue
+    end
+    % figure(321)
+    %    plot(str2double(array_str(2:end)),'.r');
+    %    grid on
+    %    drawnow
+    %    ylim(2^(ADC_WIDTH)*[0 1])
+
+    test_data(a_line, :) = str2double(array_str(start_col - 1 + num_blank + (1:length_line)));
+    waitbar(a_line / number_line)
+end
+close(h)
+
+% sound_velocity = readmatrix('../../data/09.04.2025/adc_00_17_27COM13stab.txt');
+% sound_velocity = sound_velocity(:,4)';
+
+sound_velocity_ini = 1479.75;
+sound_velocity_tgt = 1479;
 
 % количество считанных строк
 [number_line,~] = size(test_data);
 % добавляем 330 пустых точек в начало
-test_data = [nan(number_line, num_blank) test_data(:,start_col:end)];
+% test_data = [nan(number_line, num_blank) test_data(:,start_col:end)];
+% sound_velocity = sound_velocity(1:number_line);
+
+% test_data = readmatrix('../../data/DATA3.20.11.24.txt')';
+% num_blank = 330;
+% test_data = test_data(2,:);
+% test_data(1:num_blank) = 0;
+% max_data = 0.65;
+% test_data = (2^(ADC_WIDTH-1))*0.7*test_data/max_data;
+% 
+% sound_velocity = 1470;
+% 
+% [number_line,~] = size(test_data);
+
 
 % делаем количество точек в строке кратное 4
 mod_4 = mod(size(test_data,2), 4);
@@ -82,45 +142,45 @@ end
 % количество считанных строк
 [number_line,length_line] = size(test_data);
 
-% убираем постоянную составляющую в сигнале
-% % offset = 2^(ADC_WIDTH-1);
+% % убираем постоянную составляющую в сигнале
+offset = 2^(ADC_WIDTH-1);
 % offset = double(mean(mean(test_data,2,"omitnan"),"omitnan"));
-% % test_data = uint16(double(test_data) - offset + 2^(ADC_WIDTH-1));
-% % test_data(:,2:2:end) = uint16(double(test_data(:,2:2:end)) + 15);
-% test_data = int16(test_data) - offset;
-% test_data(:,1:num_blank) = NaN;
+% % % test_data = uint16(double(test_data) - offset + 2^(ADC_WIDTH-1));
+% % % test_data(:,2:2:end) = uint16(double(test_data(:,2:2:end)) + 15);
+test_data = int16(test_data) - offset;
+% % test_data(:,1:num_blank) = NaN;
 
-% % figure
-% for kk = 1:number_line
-%   % % % % offset_1 = int16(round(123*sin(2*pi*2*(1:2:length_line)/length_line)));
-%   % % % % offset_2 = int16(round(123*sin(2*pi*2*(2:2:length_line)/length_line)));
-%   % offset_1 = int16(movmean(test_data(kk,1:2:end),[0 3]));
-%   % % % offset_1 = int16(movmean(offset_1,[15 15]));
-%   % offset_2 = int16(movmean(test_data(kk,2:2:end),[0 3]));
-%   % % % offset_2 = int16(movmean(offset_2,[15 15]));
-%   % test_data(kk,1:2:end) = test_data(kk,1:2:end) - offset_1;
-%   % test_data(kk,2:2:end) = test_data(kk,2:2:end) - offset_2;
-% 
-%   plot(abs(test_data(kk,1:2:end)),'.r')
-%   % plot(test_data(kk,1:2:end),'.r')
-%   % plot(offset_1,'.r')
-%   hold on
-%   plot(abs(test_data(kk,2:2:end)),'.b')
-%   % plot(test_data(kk,2:2:end),'.b')
-%   % plot(offset_2,'.b')
-%   hold off
-%   grid on
-%   xlim([1 length_line/2])
-%   % ylim([0 2^ADC_WIDTH])
-%   drawnow
-%   pause(0.5)
-% end
-test_data = int16(test_data);
+% figure
+for kk = 1:number_line
+  % % % offset_1 = int16(round(123*sin(2*pi*2*(1:2:length_line)/length_line)));
+  % % % offset_2 = int16(round(123*sin(2*pi*2*(2:2:length_line)/length_line)));
+  offset_1 = int16(movmean(test_data(kk,1:2:end),[0 3]));
+  % % offset_1 = int16(movmean(offset_1,[15 15]));
+  offset_2 = int16(movmean(test_data(kk,2:2:end),[0 3]));
+  % % offset_2 = int16(movmean(offset_2,[15 15]));
+  test_data(kk,1:2:end) = test_data(kk,1:2:end) - offset_1;
+  test_data(kk,2:2:end) = test_data(kk,2:2:end) - offset_2;
+
+  % % plot(abs(test_data(kk,1:2:end)),'.r')
+  % plot(test_data(kk,1:2:end),'.r')
+  % % % plot(offset_1,'.r')
+  % hold on
+  % % plot(abs(test_data(kk,2:2:end)),'.b')
+  % plot(test_data(kk,2:2:end),'.b')
+  % % % plot(offset_2,'.b')
+  % hold off
+  % grid on
+  % xlim([1 length_line/2])
+  % ylim([0 2^ADC_WIDTH])
+  % drawnow
+  % pause(0.5)
+end
+% test_data = int16(test_data);
 test_data(:,1:num_blank) = NaN;
 
-% sound_velocity = sound_velocity_ini: ...
-%                  (sound_velocity_tgt-sound_velocity_ini)/(number_line-1): ...
-%                  sound_velocity_tgt;
+sound_velocity = sound_velocity_ini: ...
+                 (sound_velocity_tgt-sound_velocity_ini)/(number_line-1): ...
+                 sound_velocity_tgt;
 sound_velocity_estimation_vkf4 = NaN(1,number_line);
 sound_velocity_estimation_my   = NaN(1,number_line);
 sound_velocity_estimation      = NaN(1,number_line);
@@ -166,7 +226,7 @@ figure;
     ylabel('ошибка [см/с]')
 
 linkaxes(h_axx, 'x')
-xlim([1 number_line])
+% xlim([1 number_line])
 
 
 figure;
@@ -185,7 +245,7 @@ figure;
     ylim(pi*[-1 1])
 linkaxes(h_ax_scl, 'x')
 
-reserve = 12; % запас
+reserve = 16; % запас
 signal_size = 30 * (DATA_RATE / FREQUENCY_CENTRAL);
 window_size = (signal_size + 4*reserve); % сигнал с хвостом
 figure;
@@ -216,6 +276,11 @@ xcorr_structure.phase = single(0);
 xcorr_ptr = libstruct('Hydra_out_xcorr_t',xcorr_structure);
 test_workmass_ptr = libpointer('int16Ptr', int16(zeros(1,length_line)));
 
+otr1t = NaN; %410; % 392; % NaN; 450; % 
+otr2t = NaN; %960; % 947; % NaN; 1080; %
+otr1_ptr.Value = otr1t;
+otr2_ptr.Value = otr2t;
+
 for inx_line = 1:1:number_line
     % offset = double(mean(test_data(inx_line, :),2,"omitnan"));
     % test_mass = int16(test_data(inx_line, :) ) - offset - 0*round(xcorr_ptr.abs*0.03);
@@ -226,9 +291,12 @@ for inx_line = 1:1:number_line
 
 
 %% считает код dll
+% otr1_ptr.Value = otr1t;
+% otr2_ptr.Value = otr2t;
 tic 
-    otr1t = NaN;
-    otr2t = NaN;
+
+    otr1_ptr.Value = otr1t;
+    otr2_ptr.Value = otr2t;
     if (otr1_ptr.Value ~= 0)
        otr1t = otr1_ptr.Value;
        otr2t = otr2_ptr.Value;
@@ -241,23 +309,23 @@ tic
     otr2_dll = otr2_ptr.Value;
 toc
 
-% расчёт в matlab
-    if (~isnan(otr1t))
-       otr1_ptr.Value = otr1t;
-       otr2_ptr.Value = otr2t;
-    end
-    [time_propagation, otr1_matlab, otr2_matlab] = ...
-                        crosscorrelation (test_workmass_ptr.Value, base, ...
-                                           otr1_ptr.Value, otr2_ptr.Value);
-    % otr1_ptr.Value = otr1_dll;
-    % otr2_ptr.Value = otr2_dll;
-    otr1_ptr.Value = otr1_matlab;
-    otr2_ptr.Value = otr2_matlab;
-    % test_otr (test_workmass_ptr.Value, otr1_ptr.Value, otr2_ptr.Value, test_plots);
-    sound_velocity_estimation(inx_line) = 2 * (base(2) - base(1)) ./ time_propagation;
-
-    % % fprintf('время распространения = %f [мкс]\n', time_propagation_fi * 1e6);
-    % fprintf('скорость распространения звука = %8.2f [м/с]\n', sound_velocity_estimation_fi);
+% % расчёт в matlab
+%     % % if (~isnan(otr1t))
+%     %    otr1_ptr.Value = otr1t;
+%     %    otr2_ptr.Value = otr2t;
+%     % % end
+%     [time_propagation, otr1_matlab, otr2_matlab] = ...
+%                         crosscorrelation (test_workmass_ptr.Value, base, ...
+%                                            otr1_ptr.Value, otr2_ptr.Value);
+%     otr1_ptr.Value = otr1_matlab;
+%     otr2_ptr.Value = otr2_matlab;
+    otr1_ptr.Value = otr1_dll;
+    otr2_ptr.Value = otr1_dll;
+%     test_otr (test_workmass_ptr.Value, otr1_ptr.Value, otr2_ptr.Value, test_plots);
+%     sound_velocity_estimation(inx_line) = 2 * (base(2) - base(1)) ./ time_propagation;
+% 
+%     % fprintf('время распространения = %f [мкс]\n', time_propagation_fi * 1e6);
+%     % fprintf('скорость распространения звука = %8.2f [м/с]\n', sound_velocity_estimation_fi);
 
     
 
@@ -277,6 +345,7 @@ toc
         h_err_sv_matlab.YData    = (sound_velocity - sound_velocity_estimation)*100;
 
         drawnow
+        pause(0.5)
     end
 
     % fprintf('скорость распространения звука, [м/с]: %8.2f; %8.2f; %8.2f; %8.2f; %8.2f\n', ...
@@ -299,16 +368,18 @@ h_sv_my.YData        = sound_velocity_estimation_my;
 h_sv_matlab.YData    = sound_velocity_estimation;
 h_sv_matlab_fi.YData = sound_velocity_estimation_fi;
 
-h_sv_vkf4.YData = movmedian(sound_velocity_estimation_my,[ 10 10 ]);
+sound_velocity_flt = movmedian(sound_velocity_estimation_my,[ 10 10 ]);
+h_sv_vkf4.YData = sound_velocity_flt;
 
-h_err_sv_vkf4.YData      = (sound_velocity - sound_velocity_estimation_vkf4)*100;
-h_err_sv_my.YData        = (sound_velocity - sound_velocity_estimation_my)*100;
-h_err_sv_matlab.YData    = (sound_velocity - sound_velocity_estimation)*100;
-h_err_sv_matlab_fi.YData = (sound_velocity - sound_velocity_estimation_fi)*100;
+h_err_sv_vkf4.YData      = (sound_velocity_flt - sound_velocity_estimation_vkf4)*100;
+h_err_sv_my.YData        = (sound_velocity_flt - sound_velocity_estimation_my)*100;
+h_err_sv_matlab.YData    = (sound_velocity_flt - sound_velocity_estimation)*100;
+h_err_sv_matlab_fi.YData = (sound_velocity_flt - sound_velocity_estimation_fi)*100;
 
 drawnow
 
-sum(abs(sound_velocity - sound_velocity_estimation)>3)
+sum(abs(sound_velocity_flt - sound_velocity_estimation)>3)
+sum(abs(sound_velocity_flt - sound_velocity_estimation_my)>3)
 
 clear all
 unloadlibrary hydra_svm_math;

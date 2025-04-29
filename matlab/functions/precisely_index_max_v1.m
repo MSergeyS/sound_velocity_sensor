@@ -57,9 +57,9 @@ function [index] = precisely_index_max_v1 (s1, s2, trh_1, trh_2)
    inx_s1_0 = inx_s1_trh1 + abs_s1_trh1*inx_s1_trh1/(abs_s1_trh2 - abs_s1_trh1);
    inx_s2_0 = inx_s2_trh1 + abs_s2_trh1*inx_s2_trh1/(abs_s2_trh2 - abs_s2_trh1);
    index = (inx_s2_0 - inx_s1_0) + (inx_s2_trh2 - inx_s1_trh2);
-   
-   fprintf('%d %d %d %d %.2f\n',inx_s1_trh1, inx_s1_trh2, abs_s1_trh1, abs_s1_trh2, inx_s1_0)
-   fprintf('%d %d %d %d %.2f\n',inx_s2_trh1, inx_s2_trh2, abs_s2_trh1, abs_s2_trh2, inx_s2_0)
+
+   % fprintf('%d %d %d %d %.2f\n',inx_s1_trh1, inx_s1_trh2, abs_s1_trh1, abs_s1_trh2, inx_s1_0)
+   % fprintf('%d %d %d %d %.2f\n',inx_s2_trh1, inx_s2_trh2, abs_s2_trh1, abs_s2_trh2, inx_s2_0)
    
    if (fl_plot) % строим график
       figure(999)

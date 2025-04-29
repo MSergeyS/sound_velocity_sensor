@@ -20,6 +20,8 @@
 #else
 #define HYDRA_SVM_MATH_API
 #endif
+#define HYDRA_SVM_ADC_COMPLITE_BUFF_SIZE 2222
+#define HYDRA_SVM_ADC_WORK_BUFF_SIZE 1600
 
 /** @addtogroup cTODO hydra-svm-math
   * @{
@@ -56,6 +58,10 @@ uint16_t hydra_xcorr_real_abs(int32_t* s1_abs, int32_t* s2_abs,
 
 extern "C" HYDRA_SVM_MATH_API
 bool hydra_norm_and_trh(int16_t s_abs, int16_t trh, int16_t* min_delta_trh);
+
+extern "C" HYDRA_SVM_MATH_API
+uint8_t hydra_svm_measure_normalization(const uint16_t* p_tripleconverted,
+                          int16_t* p_normalizedconverted, const uint16_t mas_size);
 
 
 #endif // HYDRA_SVM_MATH_H_

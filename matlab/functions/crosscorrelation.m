@@ -1,4 +1,4 @@
-function [time_propagation, otr1, otr2 ] = crosscorrelation (scope_real, base, otr1, otr2)
+function [time_propagation, otr1, otr2 ] = crosscorrelation (scope_real, base, otr1, otr2, reserve)
 
 global HYDRA_SVM_ADC_OUT_BUFF_SIZE
 global ADC_WIDTH
@@ -9,7 +9,6 @@ scope_real = double(scope_real);
 otr1 = double(otr1);
 otr2 = double(otr2);
 
-    reserve = 17; % запас
     signal_size = 30 * (DATA_RATE / FREQUENCY_CENTRAL);
     window_size = (signal_size + 4*reserve); % сигнал с хвостом
     if(otr1 == 0)
@@ -21,7 +20,7 @@ otr2 = double(otr2);
     end
 
     otr2 = otr2 - reserve; %!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   
+
     % получаем комплексные отсчёты
     scope_complex = [ (      scope_real(1:4:end) + 1i*scope_real(2:4:end) ); ...
                       (     -scope_real(3:4:end) + 1i*scope_real(2:4:end) ); ...
@@ -29,6 +28,7 @@ otr2 = double(otr2);
                       ( [ scope_real(5:4:end) 0] - 1i*scope_real(4:4:end) ) ];
 
     scope_complex = reshape(scope_complex,1, size(scope_real,2));
+    scope_complex = conj(scope_complex);
 
     figure(555)
     subplot(2,1,1)
@@ -80,7 +80,7 @@ otr2 = double(otr2);
     % нормируем
     %xss = xss / (signal_size*2^(2*ADC_WIDTH-1));
     % ищем максимум
-    [~, inx_max_xss] = max(abs(xss));
+    [max_abs_xss, inx_max_xss] = max(abs(xss));
     % phase = angle(xss(inx_max_xss_x)); % фаза ВКФ
     phase = single(atan2(single(imag(xss(inx_max_xss))),single(real(xss(inx_max_xss)))));
     
@@ -88,24 +88,33 @@ otr2 = double(otr2);
     otr2 = otr2 + reserve;
     if (reserve ~= 0)    
         % уточняем индек начала фронта
-        % inx_max_xss_f = precisely_index_max_v0 ( ...
-        %     scope_complex(otr1-reserve:otr1+reserve), ...
-        %     scope_complex(otr2-reserve:otr2+3*reserve));
-        % inx_max_xss_f = precisely_index_max_v1 ( ...
-        %     scope_complex(otr1 - 7:otr1+2*reserve - 5), ...
-        %     scope_complex(otr2 - 7:otr2+2*reserve - 5), ...
+        % inx_max_xss_f(1) = precisely_index_max_v1 ( ...
+        %     scope_complex(otr1+reserve:otr1+3*reserve), ...
+        %     scope_complex(otr2+reserve:otr2+3*reserve), ...
+        %     0.1, 0.6);
+        % inx_max_xss_f(2) = precisely_index_max_v1 ( ...
+        %     scope_complex(otr1+reserve:otr1+3*reserve), ...
+        %     scope_complex(otr2+reserve:otr2+3*reserve), ...
+        %     0.15, 0.65);
+        % inx_max_xss_f(3) = precisely_index_max_v1 ( ...
+        %     scope_complex(otr1+reserve:otr1+3*reserve), ...
+        %     scope_complex(otr2+reserve:otr2+3*reserve), ...
         %     0.2, 0.6);
+        % inx_max_xss_f(4) = precisely_index_max_v1 ( ...
+        %     scope_complex(otr1+reserve:otr1+3*reserve), ...
+        %     scope_complex(otr2+reserve:otr2+3*reserve), ...
+        %     0.2, 0.7);
         inx_max_xss_f = precisely_index_max_v1 ( ...
             scope_complex(otr1+reserve:otr1+3*reserve), ...
             scope_complex(otr2+reserve:otr2+3*reserve), ...
             0.2, 0.6);
+        % inx_max_xss_f = mean(inx_max_xss_f);
         if (inx_max_xss < 1)
             inx_max_xss = 1;
         end
     end
-    if (~isinf(inx_max_xss_f) && ~isnan(inx_max_xss_f)) % && inx_max_xss_f>1)
-       inx_max_xss = inx_max_xss_f;
-    end
+    
+
 
     % phase = angle(single(xss(inx_max_xss))); % фаза ВКФ
     % phase = single(atan2(single(imag(xss(inx_max_xss))),single(real(xss(inx_max_xss)))));
@@ -116,29 +125,49 @@ otr2 = double(otr2);
     % inx_max_xss = inx_max_xss + I - 6;
 
     %% измеренное время
-    inx_max = otr2 - otr1 + (inx_max_xss-1);
-    time_xcorr = inx_max/DATA_RATE;
+    inx_max_xcorr = otr2 - otr1 + (inx_max_xss-reserve-1);
+    time_xcorr = inx_max_xcorr/DATA_RATE;
+    time_front = NaN;
+    if (~isinf(inx_max_xss_f) && ~isnan(inx_max_xss_f)) % && inx_max_xss_f>1)
+        inx_max_f = otr2 - otr1 + (inx_max_xss_f-1);
+        time_front = inx_max_f/DATA_RATE;
+        fix_num_periods = floor(time_front*FREQUENCY_CENTRAL);
+        if  ((inx_max_xcorr - inx_max_f) < -7) || ...
+            ((inx_max_xcorr - inx_max_f) > 7)
+            inx_max = inx_max_xcorr;
+        else
+            inx_max = inx_max_f;
+        end
+        
+    else
+        fix_num_periods = floor(time_xcorr*FREQUENCY_CENTRAL);
+        inx_max = inx_max_xcorr;
+    end
+    
 
-    fix_num_periods = floor(time_xcorr*FREQUENCY_CENTRAL);
     if ( (phase < 0) && ( inx_max - fix_num_periods*4 > 1) ) || ...
        ( (phase < -pi/2) && ( inx_max - fix_num_periods*4 == 1) ) || ...
        ( (phase >= 0) && (phase < pi/2) && (inx_max - fix_num_periods * 4 == 3) )
         fix_num_periods = single(fix_num_periods + 1);
     end
+    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) > 5)
+        fix_num_periods = fix_num_periods + 1;
+    end
+    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) < 1)
+        fix_num_periods = fix_num_periods - 1;
+    end
 
     time_propagation = (fix_num_periods + phase/single(2*pi))/FREQUENCY_CENTRAL;
     
-    time = 1e6*(otr2 - otr1 + (0:window_size-1))./DATA_RATE;
+    time = 1e6*(otr2 - reserve - otr1 + (0:window_size-1))./DATA_RATE;
 
     figure(777)
       axc(1) = subplot(3,1,1);
         plot(time,abs(s1),'.r')
         hold on
         plot(time,abs(s2),'.b')
-        % plot(time,angle(s1),'.g')
         hold off
-        % ylim([0 2^(ADC_WIDTH-1)])
-        % ylim([-pi pi])
+        ylim([0 2^(ADC_WIDTH-1)])
         grid on
       axc(2) = subplot(3,1,2);
         plot(time,abs(xss),'.g')
@@ -147,14 +176,16 @@ otr2 = double(otr2);
         line((fix_num_periods/FREQUENCY_CENTRAL)*1e6*[1 1],[0 1], ...
              'Color','r','LineStyle','--')
         line(time_xcorr*1e6*[1 1],max(abs(xss))*[0 1], ...
+             'Color','g','LineStyle','--')
+        line(time_front*1e6*[1 1],max(abs(xss))*[0 1], ...
              'Color','b','LineStyle','--')
         line(time_propagation*1e6*[1 1],max(abs(xss))*[0 1], ...
-             'Color','k','LineStyle','--')
+             'Color','r','LineStyle','--')
         hold off
         grid on
         % xlim((t1 + [-10 10]./DATA_RATE)*1e6)
-        % xlim([44 47])
-        % ylim(max_abs_xss *[0.9 1.05])  
+        xlim([44 47])
+        ylim(max_abs_xss *[0.9 1.05])  
         % xlim([min(time) max(time)])
         % ylim([0.02 0.035])
       axc(3) = subplot(3,1,3);

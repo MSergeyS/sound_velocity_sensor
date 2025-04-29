@@ -31,6 +31,7 @@ typedef struct  Hydra_Svm_Complex64_t
 
 typedef struct  Hydra_out_xcorr_t 
 {
+    uint16_t index_time_xcorr;
     uint16_t index_time_propagation;
     float    phase;
     float    abs;

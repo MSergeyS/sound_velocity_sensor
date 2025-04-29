@@ -1,4 +1,4 @@
-function test_otr (scope_real, otr1, otr2, test_plots)
+function test_otr (scope_real, otr1, otr2, reserve, test_plots)
 
     global FREQUENCY_CENTRAL
     global DATA_RATE
@@ -7,7 +7,6 @@ function test_otr (scope_real, otr1, otr2, test_plots)
     otr1 = double(otr1);
     otr2 = double(otr2);
 
-    reserve = 12; % запас
     signal_size = 30 * (DATA_RATE / FREQUENCY_CENTRAL);
     window_size = (signal_size + 4*reserve); % сигнал с хвостом
         

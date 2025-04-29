@@ -64,44 +64,26 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
 
     for (uint16_t i = otr1 - reserve - 2; i < data_size - 4; i = i + 4)
     {
+        //data_complex[i].Re = p_workconverted[i];//1
+        //data_complex[i].Im = p_workconverted[i + 1];
+        //data_complex[i + 1].Re = -1 * p_workconverted[i + 2];//2
+        //data_complex[i + 1].Im = p_workconverted[i + 1];
+        //data_complex[i + 2].Re = -1 * p_workconverted[i + 2];//3
+        //data_complex[i + 2].Im = -1 * p_workconverted[i + 3];
+        //data_complex[i + 3].Re = p_workconverted[i + 4];//4
+        //data_complex[i + 3].Im = -1 * p_workconverted[i + 3];
+
         data_complex[i].Re = p_workconverted[i];//1
-        data_complex[i].Im = p_workconverted[i + 1];
+        data_complex[i].Im = -p_workconverted[i + 1];
         data_complex[i + 1].Re = -1 * p_workconverted[i + 2];//2
-        data_complex[i + 1].Im = p_workconverted[i + 1];
+        data_complex[i + 1].Im = -p_workconverted[i + 1];
         data_complex[i + 2].Re = -1 * p_workconverted[i + 2];//3
-        data_complex[i + 2].Im = -1 * p_workconverted[i + 3];
+        data_complex[i + 2].Im = 1 * p_workconverted[i + 3];
         data_complex[i + 3].Re = p_workconverted[i + 4];//4
-        data_complex[i + 3].Im = -1 * p_workconverted[i + 3];
-
-        // data_complex[i].Re = -1 * p_workconverted[i];//1
-        // data_complex[i].Im = -1 * p_workconverted[i + 1];
-        // data_complex[i + 1].Re = p_workconverted[i + 2];//2
-        // data_complex[i + 1].Im = -1 *p_workconverted[i + 1];
-        // data_complex[i + 2].Re = p_workconverted[i + 2];//3
-        // data_complex[i + 2].Im = p_workconverted[i + 3];
-        // data_complex[i + 3].Re = -1 * p_workconverted[i + 4];//4
-        // data_complex[i + 3].Im = p_workconverted[i + 3];
-
-        // data_complex[i].Re = p_workconverted[i + 1];//1
-        // data_complex[i].Im = p_workconverted[i + 2];
-        // data_complex[i + 1].Re = -1 * p_workconverted[i + 3];//2
-        // data_complex[i + 1].Im = p_workconverted[i + 2];
-        // data_complex[i + 2].Re = -1 * p_workconverted[i + 3];//3
-        // data_complex[i + 2].Im = -1 * p_workconverted[i + 4];
-        // data_complex[i + 3].Re = p_workconverted[i + 5];//4
-        // data_complex[i + 3].Im = -1 * p_workconverted[i + 4];
-
-        // data_complex[i].Re = -1 * p_workconverted[i + 1];//1
-        // data_complex[i].Im = -1 * p_workconverted[i + 2];
-        // data_complex[i + 1].Re = p_workconverted[i + 3];//2
-        // data_complex[i + 1].Im = -1 * p_workconverted[i + 2];
-        // data_complex[i + 2].Re = p_workconverted[i + 3];//3
-        // data_complex[i + 2].Im = p_workconverted[i + 4];
-        // data_complex[i + 3].Re = -1 * p_workconverted[i + 5];//4
-        // data_complex[i + 3].Im = p_workconverted[i + 4];
+        data_complex[i + 3].Im = 1 * p_workconverted[i + 3];
     }
 
-    int16_t index_xcorr_max_f = 0;
+    int16_t index_xcorr_max_f = INDEX_NULL;
     Hydra_Svm_Complex32_t* s1;
     Hydra_Svm_Complex32_t* s2;
 
@@ -168,51 +150,61 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
         s1 = &data_complex[otr1 + reserve];
         s2 = &data_complex[otr2 + reserve];
 
-        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 3*reserve + 1);
-
-        std::cout << index_xcorr_max_f << " " << index_xcorr_max << std::endl;
-  
-        index_xcorr_max =
+        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 3*reserve + 1);   
+        index_xcorr_max_f =
                ((((int16_t)index_xcorr_max - (int16_t)index_xcorr_max_f) > -7) &&
                 (((int16_t)index_xcorr_max - (int16_t)index_xcorr_max_f) < 7)) ?
-               index_xcorr_max_f : index_xcorr_max;
+                index_xcorr_max_f : INDEX_NULL;
     }
-
+    // индекс (измеренное время распространения в периодах частоты дискретизации)
+    index_xcorr_max = (otr2 - otr1 + index_xcorr_max - 1);
+    // индекс (измеренное время распространения в периодах частоты дискретизации)
+    index_xcorr_max_f = (index_xcorr_max_f == INDEX_NULL) ?
+               INDEX_NULL : (otr2 - otr1 + index_xcorr_max_f - 1);
+    
     //после того, как нашли максимальное a b, берем atan(b/a) в максимальном месте
     phase = atan2f((float)xcorr_max.Im, (float)xcorr_max.Re);
     abs = sqrtf(sqrtf((float)xcorr_max_abs) / (float)window_size);
 
-    // индекс (измеренное время распространения в периодах частоты дискретизации)
-    index_xcorr_max = (otr2 - otr1 + index_xcorr_max - 1);
-
-    Hydra_out_xcorr_t result = {index_xcorr_max, phase, abs};
+    Hydra_out_xcorr_t result = {index_xcorr_max, index_xcorr_max_f, phase, abs};
     return result;
 }
 
 float
 hydra_time_propagation_calculation(Hydra_out_xcorr_t xcorr)
 {
-    float time_xcorr = 0.0;
-    float fix_num_periods = 0;
+    float fix_num_periods = 0.0;
     float time_propagation = 0.0;
-    
-    // измеренное время распространения в периодах частоты дискретизации
-    time_xcorr = ((float)(xcorr.index_time_propagation))/DATA_RATE;
+    float index_time_propagation = 0.0;
 
-    // сколько целых периодов "умещается" в time_xcorr
-    fix_num_periods = floorf(time_xcorr*FREQUENCY_CENTRAL);
-    if ( ( ( xcorr.phase < 0 ) && (xcorr.index_time_propagation - 4*fix_num_periods > 1) ) ||
-         ( (xcorr.phase < -M_PI / 2.0) && (xcorr.index_time_propagation - fix_num_periods * 4 == 1) ) ||
-         ( (xcorr.phase >= 0.0) && (xcorr.phase < M_PI / 2.0) && (xcorr.index_time_propagation - fix_num_periods * 4 == 3) ) )
+    // вермя распространения сигнала от мишени 1 до мишени 2 time_propagation
+    index_time_propagation = ((int16_t)(xcorr.index_time_propagation) == INDEX_NULL) ?
+                  (float)(xcorr.index_time_xcorr) : (float)(xcorr.index_time_propagation);
+
+    // сколько целых периодов "умещается" в time_propagation
+    fix_num_periods = floorf(index_time_propagation*FREQUENCY_CENTRAL / DATA_RATE);
+
+    if ( ( ( xcorr.phase < 0 ) && (index_time_propagation - 4*fix_num_periods > 1) ) ||
+         ( (xcorr.phase < -M_PI / 2.0) && (index_time_propagation - 4*fix_num_periods == 1) ) ||
+         ( (xcorr.phase >= 0.0) && (xcorr.phase < M_PI / 2.0)
+                                && (index_time_propagation - 4*fix_num_periods == 3) ) )
     {
         fix_num_periods = fix_num_periods + 1;
+    }
+
+    if ( ( (float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0*M_PI)) ) > 4)
+    {
+        fix_num_periods = fix_num_periods + 1;
+    }
+
+    if (((float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0 * M_PI))) < 0)
+    {
+        fix_num_periods = fix_num_periods - 1;
     }
 
     // время распространения звука
     time_propagation =
          (fix_num_periods + xcorr.phase / (float)(2.0 * M_PI))/FREQUENCY_CENTRAL;
-
-    
 
     return time_propagation; // time_xcorr;//
 }
@@ -221,8 +213,8 @@ float
 hydra_sound_velocity_estimation(Hydra_out_xcorr_t xcorr_1, float base_1,
                                 Hydra_out_xcorr_t xcorr_2, float base_2)
 {
-    float time_propagation_1 = 0.0;  //время распространения звука для первой базы
-    float time_propagation_2 = 0.0;  //время распространения звука для второй базы
+    float time_propagation_1 = 0.0;  // время распространения звука для первой базы
+    float time_propagation_2 = 0.0;  // время распространения звука для второй базы
     float sound_velocity_array_1[3]; // возможные скорости звука (по первой базе)
     float sound_velocity_array_2[3]; // возможные скорости звука (по второй базе)
     float sound_velocity = 0.0;      // результирующая оценка скорости распространения звука
@@ -409,18 +401,18 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     s2_abs[0] = s2_abs_t[0];
     s2_abs[window_size-1] = s2_abs_t[window_size-1];
 
-    std::cout << "s1_abs = [";
-    for (int16_t i = 0; i < window_size; i++)
-    {
-        std::cout << s1_abs[i] << " ";
-    }
-    std::cout << "]" << std::endl;
-    std::cout << "s2_abs = [";
-    for (int16_t i = 0; i < window_size; i++)
-    {
-        std::cout << s2_abs[i] << " ";
-    }
-    std::cout << "]" << std::endl;
+    //std::cout << "s1_abs = [";
+    //for (int16_t i = 0; i < window_size; i++)
+    //{
+    //    std::cout << s1_abs[i] << " ";
+    //}
+    //std::cout << "]" << std::endl;
+    //std::cout << "s2_abs = [";
+    //for (int16_t i = 0; i < window_size; i++)
+    //{
+    //    std::cout << s2_abs[i] << " ";
+    //}
+    //std::cout << "]" << std::endl;
 
     // значение порогов
     int16_t trh_1_s1 = (int16_t)(trh_1 * (float)s1_abs_max);
@@ -482,13 +474,13 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     float inx_s2_0 = (float)inx_s2_trh1 +
             (float)((int16_t)inx_s2_trh1 * abs_s2_trh1) / (float)(abs_s2_trh2 - abs_s2_trh1);
 
-    std::cout << inx_s1_trh1 << " " << inx_s1_trh2 << " " <<
-                 abs_s1_trh1 << " " << abs_s1_trh2 << " " << inx_s1_0 << std::endl;
-    std::cout << inx_s2_trh1 << " " << inx_s2_trh2 << " " << 
-                 abs_s2_trh1 << " " << abs_s2_trh2 << " " << inx_s2_0 << std::endl;
+    //std::cout << inx_s1_trh1 << " " << inx_s1_trh2 << " " <<
+    //             abs_s1_trh1 << " " << abs_s1_trh2 << " " << inx_s1_0 << std::endl;
+    //std::cout << inx_s2_trh1 << " " << inx_s2_trh2 << " " << 
+    //             abs_s2_trh1 << " " << abs_s2_trh2 << " " << inx_s2_0 << std::endl;
 
     int16_t index = int16_t(round(inx_s2_0 - inx_s1_0)) + (inx_s2_trh2 - inx_s1_trh2);
-    std::cout << index << std::endl;
+    //std::cout << index << std::endl;
     return index;
 }
 
@@ -502,4 +494,51 @@ hydra_norm_and_trh(int16_t s_abs, int16_t trh, int16_t* min_delta_trh)
         return true; // признак изменения значений
     }
     return false;
+}
+
+/* @brief функция ищет среднее (полку) значения оцифрованных данных
+*              ВАЖНО: первые okno ячеек выходного массива равны среднему по окну.
+*
+* @param p_tripleconverted     - входной массив оцифрованных данных (приведённый к 12 МГц)
+* @param p_normalizedconverted,- выходной массив усреднённый по окну
+* @param mas_size              - размер массива данных (и массива среднего)
+* @return                      - TRUE - удачное создание массива
+*                              - FALSE - ошибка
+*/
+
+uint8_t
+hydra_svm_measure_normalization(const uint16_t* p_tripleconverted, int16_t* p_normalizedconverted, const uint16_t mas_size)
+{
+    float srednee_okno1, srednee_okno2;
+    const uint16_t okno = 4; // размер окна (количество тактов тактирования АЦП на один период частоты излучающего сигнала)
+    int16_t imas, iokno;
+    int16_t normalized_fullsize[HYDRA_SVM_ADC_COMPLITE_BUFF_SIZE] = { 0 };
+
+
+    if (mas_size > HYDRA_SVM_ADC_COMPLITE_BUFF_SIZE)
+        return FALSE;
+    //memset(p_zeroconverted,0,mas_size*sizeof(uint16_t));
+    if (mas_size < okno)
+        return FALSE;
+
+    // считаем среднее окном по всему массиву
+    for (imas = okno * 2; imas < mas_size; imas += 2)
+    {
+        srednee_okno1 = 0.;
+        srednee_okno2 = 0.;
+        for (iokno = 0; iokno < okno; ++iokno)
+        {
+            srednee_okno1 = srednee_okno1 + p_tripleconverted[iokno * 2 + (imas - okno)];
+            srednee_okno2 = srednee_okno2 + p_tripleconverted[iokno * 2 + (imas + 1 - okno)];
+        }
+        srednee_okno1 = srednee_okno1 / okno;
+        srednee_okno2 = srednee_okno2 / okno;
+
+        normalized_fullsize[imas] = ((int16_t)p_tripleconverted[imas] - (int16_t)(srednee_okno1));
+        normalized_fullsize[imas + 1] = ((int16_t)p_tripleconverted[imas + 1] - (int16_t)(srednee_okno2));
+    }
+    //p_normalizedconverted = &normalized_fullsize[0];
+    memcpy(p_normalizedconverted, normalized_fullsize, 2*mas_size);
+    //memcpy(p_normalizedconverted, &normalized_fullsize[300], HYDRA_SVM_ADC_WORK_BUFF_SIZE * sizeof(int16_t)); // отрезаем только "нужный" отрезок массива
+    return TRUE; // возвращаем среднее по всему массиву
 }

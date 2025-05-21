@@ -28,7 +28,12 @@ otr2 = double(otr2);
                       ( [ scope_real(5:4:end) 0] - 1i*scope_real(4:4:end) ) ];
 
     scope_complex = reshape(scope_complex,1, size(scope_real,2));
-    scope_complex = conj(scope_complex);
+    % scope_complex = conj(scope_complex);
+
+    % % фильтрация
+    % filt = fir;
+    % scope_complex = filt(real(scope_complex'))' - 1i*filt(imag(scope_complex'))';
+    % scope_complex = circshift(scope_complex, -ceil(length(filt.Numerator)/2)+1);
 
     figure(555)
     subplot(2,1,1)
@@ -150,10 +155,10 @@ otr2 = double(otr2);
        ( (phase >= 0) && (phase < pi/2) && (inx_max - fix_num_periods * 4 == 3) )
         fix_num_periods = single(fix_num_periods + 1);
     end
-    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) > 5)
+    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) > 2)
         fix_num_periods = fix_num_periods + 1;
     end
-    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) < 1)
+    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) < -2)
         fix_num_periods = fix_num_periods - 1;
     end
 
@@ -203,8 +208,8 @@ otr2 = double(otr2);
       % pause(0.5)
 
     sound_velocity = 2 * (base(2) - base(1)) ./ time_propagation; 
-    otr1 = uint16(round((2*base(1)/sound_velocity)*DATA_RATE));
-    otr2 = uint16(round((2*base(2)/sound_velocity)*DATA_RATE));
+    otr1 = uint16(round((2*base(1)/sound_velocity)*DATA_RATE)) - reserve;
+    otr2 = uint16(round((2*base(2)/sound_velocity)*DATA_RATE)) - reserve;
 
       % figure(17)
       %  plot (abs(scope_complex(otr1-2*reserve-1:otr1-2*reserve+window_size-1)),'.r-')

@@ -21,7 +21,7 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
     uint16_t window_size = (signal_lenght  + 57); // сигнал с хвостом
     uint16_t max_inx_window_1 = otr1 + window_size;
     bool otr_true = true;
-    uint16_t reserve = 17; // 0
+    uint16_t reserve = RESERVE; // 0
     if(otr1 == 0)
     {
         otr1 = 300;              // минимальный индекс начала первого окна
@@ -64,23 +64,23 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
 
     for (uint16_t i = otr1 - reserve - 2; i < data_size - 4; i = i + 4)
     {
-        //data_complex[i].Re = p_workconverted[i];//1
-        //data_complex[i].Im = p_workconverted[i + 1];
-        //data_complex[i + 1].Re = -1 * p_workconverted[i + 2];//2
-        //data_complex[i + 1].Im = p_workconverted[i + 1];
-        //data_complex[i + 2].Re = -1 * p_workconverted[i + 2];//3
-        //data_complex[i + 2].Im = -1 * p_workconverted[i + 3];
-        //data_complex[i + 3].Re = p_workconverted[i + 4];//4
-        //data_complex[i + 3].Im = -1 * p_workconverted[i + 3];
-
         data_complex[i].Re = p_workconverted[i];//1
-        data_complex[i].Im = -p_workconverted[i + 1];
+        data_complex[i].Im = p_workconverted[i + 1];
         data_complex[i + 1].Re = -1 * p_workconverted[i + 2];//2
-        data_complex[i + 1].Im = -p_workconverted[i + 1];
+        data_complex[i + 1].Im = p_workconverted[i + 1];
         data_complex[i + 2].Re = -1 * p_workconverted[i + 2];//3
-        data_complex[i + 2].Im = 1 * p_workconverted[i + 3];
+        data_complex[i + 2].Im = -1 * p_workconverted[i + 3];
         data_complex[i + 3].Re = p_workconverted[i + 4];//4
-        data_complex[i + 3].Im = 1 * p_workconverted[i + 3];
+        data_complex[i + 3].Im = -1 * p_workconverted[i + 3];
+
+        //data_complex[i].Re = p_workconverted[i];//1
+        //data_complex[i].Im = -p_workconverted[i + 1];
+        //data_complex[i + 1].Re = -1 * p_workconverted[i + 2];//2
+        //data_complex[i + 1].Im = -p_workconverted[i + 1];
+        //data_complex[i + 2].Re = -1 * p_workconverted[i + 2];//3
+        //data_complex[i + 2].Im = 1 * p_workconverted[i + 3];
+        //data_complex[i + 3].Re = p_workconverted[i + 4];//4
+        //data_complex[i + 3].Im = 1 * p_workconverted[i + 3];
     }
 
     int16_t index_xcorr_max_f = INDEX_NULL;
@@ -147,10 +147,11 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
         otr2 = otr2 + reserve;
         index_xcorr_max = index_xcorr_max - (int16_t)reserve;
 
-        s1 = &data_complex[otr1 + reserve];
-        s2 = &data_complex[otr2 + reserve];
+        s1 = &data_complex[otr1 + reserve - 1];
+        s2 = &data_complex[otr2 + reserve - 1];
 
-        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 3*reserve + 1);   
+        index_xcorr_max_f = hydra_xcorr_real_v1(s1, s2, (float)0.2, (float)0.6, 3*reserve + 1);
+        //std::cout << index_xcorr_max << " " << index_xcorr_max_f << std::endl;
         index_xcorr_max_f =
                ((((int16_t)index_xcorr_max - (int16_t)index_xcorr_max_f) > -7) &&
                 (((int16_t)index_xcorr_max - (int16_t)index_xcorr_max_f) < 7)) ?
@@ -167,6 +168,7 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
     abs = sqrtf(sqrtf((float)xcorr_max_abs) / (float)window_size);
 
     Hydra_out_xcorr_t result = {index_xcorr_max, index_xcorr_max_f, phase, abs};
+    
     return result;
 }
 
@@ -192,12 +194,12 @@ hydra_time_propagation_calculation(Hydra_out_xcorr_t xcorr)
         fix_num_periods = fix_num_periods + 1;
     }
 
-    if ( ( (float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0*M_PI)) ) > 4)
+    if ( ( (float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0*M_PI)) ) > 1)
     {
         fix_num_periods = fix_num_periods + 1;
     }
 
-    if (((float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0 * M_PI))) < 0)
+    if (((float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0 * M_PI))) < -3)
     {
         fix_num_periods = fix_num_periods - 1;
     }
@@ -269,9 +271,9 @@ hydra_svm(int16_t* p_workconverted, float distance_1, float distance_2,
     // примерная оценка скорости звука
     sound_velocity = 2 * (distance_2 - distance_1) / time_propagation;
 
-    *p_otr1 = (uint16_t)roundf((2*distance_1/sound_velocity)*DATA_RATE);
+    *p_otr1 = (uint16_t)roundf((2*distance_1/sound_velocity)*DATA_RATE) - (uint16_t)RESERVE;
     //*p_otr2 = *p_otr1 + xcorr->index_time_propagation-1;
-    *p_otr2 = (uint16_t)roundf((2*distance_2/sound_velocity)*DATA_RATE);
+    *p_otr2 = (uint16_t)roundf((2*distance_2/sound_velocity)*DATA_RATE) - (uint16_t)RESERVE;
 
     return sound_velocity;
 }
@@ -401,18 +403,18 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     s2_abs[0] = s2_abs_t[0];
     s2_abs[window_size-1] = s2_abs_t[window_size-1];
 
-    //std::cout << "s1_abs = [";
-    //for (int16_t i = 0; i < window_size; i++)
-    //{
-    //    std::cout << s1_abs[i] << " ";
-    //}
-    //std::cout << "]" << std::endl;
-    //std::cout << "s2_abs = [";
-    //for (int16_t i = 0; i < window_size; i++)
-    //{
-    //    std::cout << s2_abs[i] << " ";
-    //}
-    //std::cout << "]" << std::endl;
+    std::cout << "s1_abs = [";
+    for (int16_t i = 0; i < window_size; i++)
+    {
+        std::cout << s1_abs[i] << " ";
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "s2_abs = [";
+    for (int16_t i = 0; i < window_size; i++)
+    {
+        std::cout << s2_abs[i] << " ";
+    }
+    std::cout << "]" << std::endl;
 
     // значение порогов
     int16_t trh_1_s1 = (int16_t)(trh_1 * (float)s1_abs_max);
@@ -474,13 +476,13 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     float inx_s2_0 = (float)inx_s2_trh1 +
             (float)((int16_t)inx_s2_trh1 * abs_s2_trh1) / (float)(abs_s2_trh2 - abs_s2_trh1);
 
-    //std::cout << inx_s1_trh1 << " " << inx_s1_trh2 << " " <<
-    //             abs_s1_trh1 << " " << abs_s1_trh2 << " " << inx_s1_0 << std::endl;
-    //std::cout << inx_s2_trh1 << " " << inx_s2_trh2 << " " << 
-    //             abs_s2_trh1 << " " << abs_s2_trh2 << " " << inx_s2_0 << std::endl;
+    std::cout << inx_s1_trh1 << " " << inx_s1_trh2+1 << " " <<
+                 abs_s1_trh1 << " " << abs_s1_trh2 << " " << inx_s1_0 << std::endl;
+    std::cout << inx_s2_trh1 << " " << inx_s2_trh2+1 << " " << 
+                 abs_s2_trh1 << " " << abs_s2_trh2 << " " << inx_s2_0 << std::endl;
 
     int16_t index = int16_t(round(inx_s2_0 - inx_s1_0)) + (inx_s2_trh2 - inx_s1_trh2);
-    //std::cout << index << std::endl;
+    std::cout << index << std::endl;
     return index;
 }
 

@@ -28,7 +28,7 @@
 #include "defines.h"
 
 
-Hydra_out_xcorr_t hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2);
+//Hydra_out_xcorr_t hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2);
 
 
 float hydra_time_propagation_calculation(Hydra_out_xcorr_t xcorr);

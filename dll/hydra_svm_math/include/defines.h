@@ -6,3 +6,4 @@
 #define FREQUENCY_CENTRAL (float)3000000.0
 #define DATA_RATE (float)12000000.0
 #define INDEX_NULL 10000
+#define RESERVE 17

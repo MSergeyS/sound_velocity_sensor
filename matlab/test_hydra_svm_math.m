@@ -16,7 +16,7 @@ DATA_RATE = single(4 * FREQUENCY_CENTRAL);
 base = single([24; 58] / 1000);
 reserve = 17; % запас
 start_index = 0;
-start_line = 2550;%1275;
+start_line = 1;%1275;
 start_col = 2;
 length_line = 1600;
 num_blank = 150;
@@ -31,29 +31,49 @@ num_blank = 150;
 % 4. Запускается по таймеру ШИМ - формирование второго ЗИ - получаем im отсчёты
 %    (ЗИ сдвинут на 1/4 периода несущей)
 % 5. Интервал накопления ГЛ данных (im)
-%
+
 % test_data = readmatrix('../../data/28.04.2025/adc_025000_13_10COM6.txt');
-% number_line = size(test_data,1);
-% 
+% test_data = readmatrix('../../data/30.04.2025/adc_025000_9_42COM6.txt');
+% test_data = readmatrix('../../data/30.04.2025/adc_025001_15_45COM1bo1.txt');
+% test_data = readmatrix('../../data/30.04.2025/adc_025002_15_41COM2.txt');
+% test_data = readmatrix('../../data/30.04.2025/adc_025002_15_45COM2.txt');
+% test_data = readmatrix('../../data/06.05.2025/test#1/adc_025001_11_39COM12bo1(#6).txt');
+% test_data = readmatrix('../../data/06.05.2025/test#1/adc_025002_11_38COM15(#4).txt');
+% test_data = readmatrix('../../data/06.05.2025/adc_025001_17_29COM12#6.txt');
+% test_data = readmatrix('../../data/06.05.2025/adc_025002_17_29COM15#4.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_01_15_53COM1.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_04_12_17COM1.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_04_12_29COM1.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_04_12_31COM1.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_06_12_18COM2.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_06_12_29COM2.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_06_12_31COM2.txt');
+% test_data = readmatrix('../../data/15.05.2025/adc_025000_15_53COM2.txt');
+% test_data = readmatrix('../../data/16.05.2025/adc_025053_14_10COM7.txt');
+% test_data = readmatrix('../../data/19.05.2025/adc_00_14_4COM6.txt');
+% test_data = readmatrix('../../data/20.05.2025/adc_00_9_10COM6.txt');
+test_data = readmatrix('../../data/20.05.2025/adc_025049_16_59COM7.txt');
+number_line = size(test_data,1);
+
 % % в комплексном виде
 % tmp_data = test_data;
 % test_data(:,1:2:2000) = tmp_data(:,1:1000);
 % test_data(:,2:2:2000) = tmp_data(:,1801:2800);
-% 
-% test_data = [NaN(number_line-start_line+1,num_blank) test_data(start_line:1:size(test_data,1),start_col + (0:length_line-1))];
 
-r_data = readcell('../../data/28.04.2025/adc_025000_15_12COM6.txt');
-number_line = length(r_data);
-h = waitbar(0, 'Cчитываем гидролокационные данные...');
-i = 0;
-for a_line = 1 : number_line
-    i = i+1;
-    array_str = split(string(r_data{a_line}),' ');
-    test_data(i, :) = [NaN(num_blank,1); ...
-           str2double(array_str(start_col + (1:length_line-num_blank)))];
-   waitbar(a_line / number_line)
-end
-close(h)
+test_data = [NaN(number_line-start_line+1,num_blank) test_data(start_line:1:size(test_data,1),start_col + (0:length_line-1))];
+
+% r_data = readcell('../../data/28.04.2025/adc_025000_15_12COM6.txt');
+% number_line = length(r_data);
+% h = waitbar(0, 'Cчитываем гидролокационные данные...');
+% i = 0;
+% for a_line = 1 : number_line
+%     i = i+1;
+%     array_str = split(string(r_data{a_line}),' ');
+%     test_data(i, :) = [NaN(num_blank,1); ...
+%            str2double(array_str(start_col + (1:length_line-num_blank)))];
+%    waitbar(a_line / number_line)
+% end
+% close(h)
 
 % number_line = length(tmp_data);
 % length_line = 2000;
@@ -91,9 +111,10 @@ if ~libisloaded('hydra_svm_math')
                            'bin/hydra_svm_math.h', 'alias', 'hydra_svm_math');
     libfunctionsview hydra_svm_math
 end
-
 % libfunctionsview hydra_svm_math
 libfunctions hydra_svm_math
+
+%test_fir
 
 h = waitbar(0, 'Обрабатываем гидролокационные данные...');
 for a_line = 1 : number_line
@@ -165,7 +186,8 @@ close(h)
 
 % sound_velocity = readmatrix('../../data/09.04.2025/adc_00_14_6COM7stab.txt');
 % sound_velocity = readmatrix('../../data/15.04.2025/adc_025000_14_36COM6stab.txt');
-% sound_velocity = sound_velocity(:,4)';
+sound_velocity = readmatrix('../../data/20.05.2025/adc_025049_16_59COM7stab.txt');
+sound_velocity = sound_velocity(:,4)';
 
 sound_velocity_ini = 1479.75;
 sound_velocity_tgt = 1479;
@@ -232,9 +254,9 @@ end
 % % test_data = int16(test_data);
 % test_data(:,1:num_blank) = NaN;
 
-sound_velocity = sound_velocity_ini: ...
-                 (sound_velocity_tgt-sound_velocity_ini)/(number_line-1): ...
-                 sound_velocity_tgt;
+% sound_velocity = sound_velocity_ini: ...
+%                  (sound_velocity_tgt-sound_velocity_ini)/(number_line-1): ...
+%                  sound_velocity_tgt;
 sound_velocity_estimation_vkf4 = NaN(1,number_line);
 sound_velocity_estimation_my   = NaN(1,number_line);
 sound_velocity_estimation      = NaN(1,number_line);
@@ -313,6 +335,7 @@ figure;
 
 otr1_ptr = libpointer('uint16Ptr', 0);
 otr2_ptr = libpointer('uint16Ptr', 0);
+xcorr_structure.index_time_xcorr = uint16(0);
 xcorr_structure.index_time_propagation = uint16(0);
 xcorr_structure.abs = single(1000);
 xcorr_structure.phase = single(0);
@@ -342,29 +365,27 @@ tic
                                 test_workmass_ptr, base(1), base(2), otr1_ptr, otr2_ptr, xcorr_ptr);
     % % double([otr1_ptr.Value otr2_ptr.Value])
     % test_otr (test_workmass_ptr.Value, otr1_ptr.Value, otr2_ptr.Value, reserve, test_plots);
-    otr1t = otr1_ptr.Value;
-    otr2t = otr2_ptr.Value;
+    otr1t_dll = otr1_ptr.Value;
+    otr2t_dll = otr2_ptr.Value;
     % inx_shift = randi([-10,10],1,1);
     % otr1_ptr.Value = otr1_dll + inx_shift;
     % inx_shift = randi([-10,10],1,1);
     % otr2_ptr.Value = otr2_dll + inx_shift;
 toc
 
-% %% расчёт в matlab
-%     otr1_ptr.Value = otr1t;
-%     otr2_ptr.Value = otr2t;
-%     [time_propagation, otr1_matlab, otr2_matlab] = ...
-%                         crosscorrelation (test_workmass_ptr.Value, base, ...
-%                                           otr1_ptr.Value, otr2_ptr.Value, reserve);
-%     otr1t = otr1_matlab;  %   
-%     otr2t = otr2_matlab;  %   
-% 
-%     test_otr (test_workmass_ptr.Value, otr1_matlab, otr2_matlab, reserve, test_plots);
-%     sound_velocity_estimation(inx_line) = 2 * (base(2) - base(1)) ./ time_propagation;
-% 
-%     % fprintf('время распространения = %f [мкс]\n', time_propagation * 1e6);
-%     % fprintf('скорость распространения звука = %8.2f [м/c]\n', sound_velocity_estimation(inx_line));
-%     % fprintf('индексы начала эхо-сигналов = [%u   %u]\n', otr1t, otr2t);
+%% расчёт в matlab
+    % otr1_ptr.Value = otr1t;
+    % otr2_ptr.Value = otr2t;
+    % [time_propagation, otr1_matlab, otr2_matlab] = ...
+    %                     crosscorrelation (test_workmass_ptr.Value, base, ...
+    %                                       otr1_ptr.Value, otr2_ptr.Value, reserve);
+    % 
+    % test_otr (test_workmass_ptr.Value, otr1_matlab, otr2_matlab, reserve, test_plots);
+    % sound_velocity_estimation(inx_line) = 2 * (base(2) - base(1)) ./ time_propagation;
+
+    % fprintf('время распространения = %f [мкс]\n', time_propagation * 1e6);
+    % fprintf('скорость распространения звука = %8.2f [м/c]\n', sound_velocity_estimation(inx_line));
+    % fprintf('индексы начала эхо-сигналов = [%u   %u]\n', otr1t, otr2t);
 
     if (fl_plot_animation)
         h_input_data.YData = test_mass;
@@ -382,8 +403,11 @@ toc
         h_err_sv_matlab.YData    = (sound_velocity - sound_velocity_estimation)*100;
 
         drawnow
-        pause(0.5)
+        % pause(0.5)
     end
+
+    otr1t = otr1t_dll;  % otr1_matlab; %
+    otr2t = otr2t_dll;  %otr2_matlab; %
 
     % fprintf('скорость распространения звука, [м/с]: %8.2f; %8.2f; %8.2f; %8.2f; %8.2f\n', ...
     %                                     sound_velocity(inx_line), ...

@@ -9,18 +9,20 @@
 
 #include "hydra_svm_math.h"
 
-Hydra_out_xcorr_t
-hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
+//Hydra_out_xcorr_t hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
+void hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2,
+                      Hydra_out_xcorr_t* result)
 {
     //otr1 = 0;
     //otr2 = 0;
     //HydraSvmParam_t* p_svm_prm = hydra_svm_prm_get_addr();
     //float DATA_RATE = p_svm_prm->sADC.adc_freq;
     //float FREQUENCY_CENTRAL = p_svm_prm->sADC.gen_freq;
-    uint16_t signal_lenght = 30 *(uint16_t)(DATA_RATE / FREQUENCY_CENTRAL);
+    //uint16_t signal_lenght = 30 *(uint16_t)(DATA_RATE / FREQUENCY_CENTRAL);
+    uint16_t signal_lenght = 27 * (uint16_t)(4);
     uint16_t window_size = (signal_lenght  + 57); // сигнал с хвостом
     uint16_t max_inx_window_1 = otr1 + window_size;
-    bool otr_true = true;
+    bool otr_true = 1;
     uint16_t reserve = RESERVE; // 0
     if(otr1 == 0)
     {
@@ -28,19 +30,21 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
         otr2 = 730;              // минимальный индекс начала первого окна
         window_size = 433;       // максимальный размер окна
         max_inx_window_1 = 560;  // максимальный индекс первого окна
-        otr_true = false;
+        otr_true = 0;
         reserve = 0;
     }
 
-    uint16_t              data_size = HYDRA_SVM_ADC_OUT_BUFF_SIZE;
-    Hydra_Svm_Complex32_t data_complex[HYDRA_SVM_ADC_OUT_BUFF_SIZE] = {0};
+    //uint16_t              data_size = HYDRA_SVM_ADC_OUT_BUFF_SIZE;
+    //Hydra_Svm_Complex32_t data_complex[HYDRA_SVM_ADC_OUT_BUFF_SIZE] = {0};
+    uint16_t              data_size = 1320;
+    Hydra_Svm_Complex32_t data_complex[1320] = { 0 };
 
     Hydra_Svm_Complex32_t xcorr_max = {0,0};
     int64_t               xcorr_max_abs = 0;
     int16_t               index_xcorr_max = 0;
 
     float    phase = 0.0;
-    float    abs = 0;
+    float    abss  = 0.0;
     int64_t xcorr_current_abs = 0;
     Hydra_Svm_Complex32_t xcorr_current;
     Hydra_Svm_Complex32_t signal_windows_1;
@@ -61,7 +65,7 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
     //}
 
     otr2 = otr2 - reserve;
-
+    FILE* pFile = fopen("myfile_.txt", "w");
     for (uint16_t i = otr1 - reserve - 2; i < data_size - 4; i = i + 4)
     {
         data_complex[i].Re = p_workconverted[i];//1
@@ -81,7 +85,13 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
         //data_complex[i + 2].Im = 1 * p_workconverted[i + 3];
         //data_complex[i + 3].Re = p_workconverted[i + 4];//4
         //data_complex[i + 3].Im = 1 * p_workconverted[i + 3];
+
+        //fprintf(pFile, "%d + 1i * %d\n", data_complex[i].Re, data_complex[i].Im);
+        //fprintf(pFile, "%d + 1i * %d\n", data_complex[i + 1].Re, data_complex[i + 1].Im);
+        //fprintf(pFile, "%d + 1i * %d\n", data_complex[i + 2].Re, data_complex[i + 2].Im);
+        //fprintf(pFile, "%d + 1i * %d\n", data_complex[i + 3].Re, data_complex[i + 3].Im);
     }
+    //fclose(pFile);
 
     int16_t index_xcorr_max_f = INDEX_NULL;
     Hydra_Svm_Complex32_t* s1;
@@ -90,6 +100,7 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
     // вычисленеие корреляционной функции
     for (uint16_t i = 0; i < window_size; i++)
     {
+
         xcorr_current.Im = 0;
         xcorr_current.Re = 0;
         //memset(xcorr_current,0,sizeof(Hydra_Svm_Complex64_t));
@@ -116,8 +127,8 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
 
         }
         // вычисляем амплитуду (квадрат амплитуды) корреляционной функции
-        xcorr_current_abs = (int64_t)xcorr_current.Re*xcorr_current.Re +
-                            (int64_t)xcorr_current.Im*xcorr_current.Im;
+        xcorr_current_abs = (int64_t)xcorr_current.Re*(int64_t)xcorr_current.Re +
+                            (int64_t)xcorr_current.Im*(int64_t)xcorr_current.Im;
         // квадратный корень не берём - нам нужно только найти максимум
         // ищем максимум
         if (xcorr_current_abs > xcorr_max_abs)
@@ -135,7 +146,11 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
         //    xcorr_max.Im = xcorr_current.Im;
         //    xcorr_max_abs = xcorr_current_abs;
         //}
+
+        fprintf(pFile, "%d : %d      %d     %d     %d    %ld + 1i * %ld       %lld  <=  %lld\n", i, index_xcorr_max, otr1, otr2, window_size, xcorr_current.Re, xcorr_current.Im, xcorr_current_abs, xcorr_max_abs);
+
     }
+    fclose(pFile);
 
     if (otr_true)
     {
@@ -165,11 +180,17 @@ hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2)
     
     //после того, как нашли максимальное a b, берем atan(b/a) в максимальном месте
     phase = atan2f((float)xcorr_max.Im, (float)xcorr_max.Re);
-    abs = sqrtf(sqrtf((float)xcorr_max_abs) / (float)window_size);
+    abss = sqrtf(sqrtf((float)xcorr_max_abs) / (float)window_size);
 
-    Hydra_out_xcorr_t result = {index_xcorr_max, index_xcorr_max_f, phase, abs};
-    
-    return result;
+    //Hydra_out_xcorr_t result = {index_xcorr_max, index_xcorr_max_f, phase, abss};
+    //return result;
+
+    result->index_time_xcorr = index_xcorr_max;
+    result->index_time_propagation = index_xcorr_max_f;
+    result->phase = phase;
+    result->abs = abss;
+
+    return;
 }
 
 float
@@ -194,12 +215,12 @@ hydra_time_propagation_calculation(Hydra_out_xcorr_t xcorr)
         fix_num_periods = fix_num_periods + 1;
     }
 
-    if ( ( (float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0*M_PI)) ) > 1)
+    if ( ( (float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0*M_PI)) ) > 2)
     {
         fix_num_periods = fix_num_periods + 1;
     }
 
-    if (((float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0 * M_PI))) < -3)
+    if (((float)(xcorr.index_time_xcorr) - 4 * (fix_num_periods + xcorr.phase / (2.0 * M_PI))) < -2)
     {
         fix_num_periods = fix_num_periods - 1;
     }
@@ -265,15 +286,16 @@ hydra_svm(int16_t* p_workconverted, float distance_1, float distance_2,
     float sound_velocity = 0.0;
     
     // ВКФ для первой базы (основной)
-    *xcorr = hydra_svm_vkf_my(p_workconverted, *p_otr1, *p_otr2);
+    //*xcorr = hydra_svm_vkf_my(p_workconverted, *p_otr1, *p_otr2);
+    hydra_svm_vkf_my(p_workconverted, *p_otr1, *p_otr2, xcorr);
     // время распространения звука
     time_propagation = hydra_time_propagation_calculation(*xcorr);
     // примерная оценка скорости звука
     sound_velocity = 2 * (distance_2 - distance_1) / time_propagation;
 
-    *p_otr1 = (uint16_t)roundf((2*distance_1/sound_velocity)*DATA_RATE) - (uint16_t)RESERVE;
+    *p_otr1 = (uint16_t)roundf((2*distance_1/sound_velocity)*DATA_RATE) - 0*(uint16_t)RESERVE;
     //*p_otr2 = *p_otr1 + xcorr->index_time_propagation-1;
-    *p_otr2 = (uint16_t)roundf((2*distance_2/sound_velocity)*DATA_RATE) - (uint16_t)RESERVE;
+    *p_otr2 = (uint16_t)roundf((2*distance_2/sound_velocity)*DATA_RATE) - 0*(uint16_t)RESERVE;
 
     return sound_velocity;
 }
@@ -403,7 +425,7 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     s2_abs[0] = s2_abs_t[0];
     s2_abs[window_size-1] = s2_abs_t[window_size-1];
 
-    std::cout << "s1_abs = [";
+    /*std::cout << "s1_abs = [";
     for (int16_t i = 0; i < window_size; i++)
     {
         std::cout << s1_abs[i] << " ";
@@ -414,7 +436,7 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     {
         std::cout << s2_abs[i] << " ";
     }
-    std::cout << "]" << std::endl;
+    std::cout << "]" << std::endl;*/
 
     // значение порогов
     int16_t trh_1_s1 = (int16_t)(trh_1 * (float)s1_abs_max);
@@ -476,13 +498,13 @@ hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t
     float inx_s2_0 = (float)inx_s2_trh1 +
             (float)((int16_t)inx_s2_trh1 * abs_s2_trh1) / (float)(abs_s2_trh2 - abs_s2_trh1);
 
-    std::cout << inx_s1_trh1 << " " << inx_s1_trh2+1 << " " <<
-                 abs_s1_trh1 << " " << abs_s1_trh2 << " " << inx_s1_0 << std::endl;
-    std::cout << inx_s2_trh1 << " " << inx_s2_trh2+1 << " " << 
-                 abs_s2_trh1 << " " << abs_s2_trh2 << " " << inx_s2_0 << std::endl;
+    //std::cout << inx_s1_trh1 << " " << inx_s1_trh2+1 << " " <<
+    //             abs_s1_trh1 << " " << abs_s1_trh2 << " " << inx_s1_0 << std::endl;
+    //std::cout << inx_s2_trh1 << " " << inx_s2_trh2+1 << " " << 
+    //             abs_s2_trh1 << " " << abs_s2_trh2 << " " << inx_s2_0 << std::endl;
 
     int16_t index = int16_t(round(inx_s2_0 - inx_s1_0)) + (inx_s2_trh2 - inx_s1_trh2);
-    std::cout << index << std::endl;
+    //std::cout << index << std::endl;
     return index;
 }
 

@@ -110,8 +110,8 @@ otr2 = double(otr2);
         %     scope_complex(otr2+reserve:otr2+3*reserve), ...
         %     0.2, 0.7);
         inx_max_xss_f = precisely_index_max_v1 ( ...
-            scope_complex(otr1+reserve:otr1+3*reserve), ...
-            scope_complex(otr2+reserve:otr2+3*reserve), ...
+            scope_complex(otr1+0*reserve:otr1+3*reserve), ...
+            scope_complex(otr2+0*reserve:otr2+3*reserve), ...
             0.2, 0.6);
         % inx_max_xss_f = mean(inx_max_xss_f);
         if (inx_max_xss < 1)
@@ -155,10 +155,10 @@ otr2 = double(otr2);
        ( (phase >= 0) && (phase < pi/2) && (inx_max - fix_num_periods * 4 == 3) )
         fix_num_periods = single(fix_num_periods + 1);
     end
-    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) > 2)
+    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) > 4)
         fix_num_periods = fix_num_periods + 1;
     end
-    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) < -2)
+    if (inx_max_xcorr - 4*(fix_num_periods + phase/single(2*pi)) < -0)
         fix_num_periods = fix_num_periods - 1;
     end
 

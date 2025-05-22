@@ -1,3 +1,5 @@
+//#pragma once
+
 // The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the HYDRASVMMATH_EXPORTS
 // symbol defined on the command line. This symbol should not be defined on any project
@@ -27,37 +29,39 @@
 #include "types.h"
 #include "defines.h"
 
+//extern "C" HYDRA_SVM_MATH_API				 
+//Hydra_out_xcorr_t hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2);														   									   
+void hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2,
+                      Hydra_out_xcorr_t* result);
 
-//Hydra_out_xcorr_t hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2);
-
-
+//extern "C" HYDRA_SVM_MATH_API
 float hydra_time_propagation_calculation(Hydra_out_xcorr_t xcorr);
 
-
+//extern "C" HYDRA_SVM_MATH_API
 float hydra_sound_velocity_estimation(Hydra_out_xcorr_t xcorr_1, float base_1,
                           Hydra_out_xcorr_t xcorr_2, float base_2);
 
-
+//extern "C" HYDRA_SVM_MATH_API
 float hydra_svm(int16_t* p_workconverted, float distance_1, float distance_2,
                           uint16_t* p_otr1, uint16_t* p_otr2,
                           Hydra_out_xcorr_t* xcorr);
 
-
+//extern "C" HYDRA_SVM_MATH_API
 uint16_t hydra_xcorr_real_v0(Hydra_Svm_Complex32_t* s1, Hydra_Svm_Complex32_t* s2, 
                           uint16_t window_size);
 
-
+//extern "C" HYDRA_SVM_MATH_API
 int16_t hydra_xcorr_real_v1(const Hydra_Svm_Complex32_t* s1, const Hydra_Svm_Complex32_t* s2,
                           const float trh_1, const float trh_2, const uint16_t window_size);
 
-
+//extern "C" HYDRA_SVM_MATH_API
 uint16_t hydra_xcorr_real_abs(int32_t* s1_abs, int32_t* s2_abs,
                           uint16_t window_size);
 
-
+//extern "C" HYDRA_SVM_MATH_API
 bool hydra_norm_and_trh(int16_t s_abs, int16_t trh, int16_t* min_delta_trh);
 
-
+//extern "C" HYDRA_SVM_MATH_API
 uint8_t hydra_svm_measure_normalization(const uint16_t* p_tripleconverted,
                           int16_t* p_normalizedconverted, const uint16_t mas_size);
 

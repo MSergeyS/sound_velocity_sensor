@@ -29,8 +29,12 @@
 #include "types.h"
 #include "defines.h"
 
+
+					 
+//Hydra_out_xcorr_t hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2);
 extern "C" HYDRA_SVM_MATH_API
-Hydra_out_xcorr_t hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2);
+void hydra_svm_vkf_my(int16_t* p_workconverted, uint16_t otr1, uint16_t otr2,
+                      Hydra_out_xcorr_t* result);
 
 extern "C" HYDRA_SVM_MATH_API
 float hydra_time_propagation_calculation(Hydra_out_xcorr_t xcorr);
